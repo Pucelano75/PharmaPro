@@ -59,7 +59,7 @@ fun MainScreen(navController: NavController) {
 
         // Botón de "Inicio de sesión" con bordes redondeados y colores personalizados
         Button(
-            onClick = { /* Acción para inicio de sesión */ },
+            onClick = { navController.navigate("register")},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
