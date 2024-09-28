@@ -34,17 +34,21 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation("io.coil-kt:coil-compose:2.4.0") //para cargar la imagen del logo
+            implementation("androidx.compose.material3:material3:1.3.0")
+            implementation("androidx.compose.material:material-icons-extended:1.3.0")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(compose.material) // Material 2, por si lo necesitas también
-            implementation("androidx.compose.material3:material3:1.3.0") // Agrega esta línea para Material 3
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+            implementation("androidx.navigation:navigation-compose:2.5.3")
+
         }
     }
 }

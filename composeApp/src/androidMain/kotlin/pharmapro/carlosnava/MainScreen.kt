@@ -1,20 +1,23 @@
 package pharmapro.carlosnava
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +39,23 @@ fun MainScreen() {
             modifier = Modifier.size(128.dp)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // Botón "Nuevo Usuario"
+        Button(
+            onClick = { navController.navigate("register") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.LightGray, // Fondo gris claro
+                contentColor = Color.Black // Texto negro
+            )
+        ) {
+            Text("Nuevo Usuario")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp)) // Agregamos un espacio entre los botones
+
 
         // Botón de "Inicio de sesión" con bordes redondeados y colores personalizados
         Button(
@@ -46,28 +65,13 @@ fun MainScreen() {
                 .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(16.dp), // Bordes redondeados
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.LightGray, // Fondo gris claro
+                containerColor = Color.LightGray, // Fondo gris claro
                 contentColor = Color.Black // Texto negro
             )
         ) {
-            Text(text = "Inicio de sesión")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botón de "Nuevo usuario" con bordes redondeados y colores personalizados
-        Button(
-            onClick = { /* Acción para nuevo usuario */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(16.dp), // Bordes redondeados
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Gray, // Fondo gris medio
-                contentColor = Color.Black // Texto negro
-            )
-        ) {
-            Text(text = "Nuevo usuario")
+            Text("Inicio de sesión")
         }
     }
 }
+
+
