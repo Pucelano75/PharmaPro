@@ -1,5 +1,6 @@
 package pharmapro.carlosnava
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -87,7 +88,8 @@ fun RegisterScreen() {
                 // Guardar los datos del usuario
                 val userPreferences = UserPreferences(context)
                 userPreferences.saveUserData(username, password)
-                // Aquí puedes agregar lógica adicional después de guardar los datos
+                // Mostrar un mensaje Toast de confirmación
+                    Toast.makeText(context, "Datos guardados con éxito", Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

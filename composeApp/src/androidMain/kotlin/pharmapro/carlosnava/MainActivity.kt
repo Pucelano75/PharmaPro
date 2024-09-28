@@ -31,5 +31,6 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = "main") {
         composable("main") { MainScreen(navController) }
         composable("register") { RegisterScreen() }
+        composable("login") { LoginScreen(navController = navController) }
     }
 }
