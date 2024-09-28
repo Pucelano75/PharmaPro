@@ -17,10 +17,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current // Obtener el contexto
 
     var username by remember { mutableStateOf("") }
@@ -90,6 +92,10 @@ fun RegisterScreen() {
                 userPreferences.saveUserData(username, password)
                 // Mostrar un mensaje Toast de confirmación
                     Toast.makeText(context, "Datos guardados con éxito", Toast.LENGTH_SHORT).show()
+                // Navegar de vuelta a la pantalla principal después del registro
+                navController.navigate("main") {
+                    popUpTo("main") { inclusive = true } // Para limpiar el stack y evitar volver atrás al registro
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -101,5 +107,5 @@ fun RegisterScreen() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewRegisterScreen() {
-    RegisterScreen( )
+    RegisterScreen(navController = rememberNavController() )
 }

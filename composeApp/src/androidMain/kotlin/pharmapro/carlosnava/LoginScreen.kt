@@ -30,13 +30,13 @@ fun LoginScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo",
-            modifier = Modifier.size(128.dp)
+            modifier = Modifier.size(64.dp)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -73,7 +73,7 @@ fun LoginScreen(navController: NavController) {
             }
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Botón de inicio de sesión
         Button(

@@ -30,7 +30,7 @@ fun Navigation() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "main") {
         composable("main") { MainScreen(navController) }
-        composable("register") { RegisterScreen() }
+        composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen(navController = navController) }
     }
 }
