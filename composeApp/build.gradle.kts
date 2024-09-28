@@ -48,6 +48,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
             implementation("androidx.navigation:navigation-compose:2.5.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+            implementation("androidx.compose.material3:material3:1.3.0")
 
         }
     }

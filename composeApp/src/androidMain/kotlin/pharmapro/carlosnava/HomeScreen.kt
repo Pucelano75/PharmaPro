@@ -1,74 +1,72 @@
 package pharmapro.carlosnava
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    // Usamos ModalNavigationDrawer para manejar el menú lateral
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            DrawerContent(navController, drawerState, scope)
+        }
     ) {
-        Text(
-            text = "Bienvenido a PharmaPro",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo",
-            modifier = Modifier.size(128.dp)
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Botón para una funcionalidad de la app
-        Button(
-            onClick = { /* Accion para esta funcionalidad */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Black
-            )
-        ) {
-            Text("Funcionalidad 1")
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Home") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Text("Menú") // Texto en lugar de un ícono
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                Text("Contenido Principal", modifier = Modifier.align(Alignment.Center))
+            }
         }
-
-        Button(
-            onClick = { /* Accion para esta funcionalidad */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Black
-            )
-        ) {
-            Text("Funcionalidad 2")
-        }
-
-        // Agrega más botones o secciones según sea necesario
     }
 }
+
+@Composable
+fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        TextButton(onClick = {
+            navController.navigate("registerMedication")
+            scope.launch { drawerState.close() } // Cerrar el menú
+        }) {
+            Text("Registrar Medicación")
+        }
+
+        TextButton(onClick = {
+            navController.navigate("programming")
+            scope.launch { drawerState.close() }
+        }) {
+            Text("Programación")
+        }
+
+        TextButton(onClick = {
+            navController.navigate("records")
+            scope.launch { drawerState.close() }
+        }) {
+            Text("Registros")
+        }
+    }
+}
+
