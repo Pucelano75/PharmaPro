@@ -82,8 +82,10 @@ fun LoginScreen(navController: NavController) {
 
                     if (username == storedUsername && password == storedPassword) {
                         Toast.makeText(context, "Inicio correcto", Toast.LENGTH_SHORT).show()
-                        // Navegar a la pantalla principal
-                        navController.navigate("main")
+                        // Navegar a HomeScreem.kt
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true } // Limpia el stack
+                        }
                     } else {
                         Toast.makeText(context, "Usuario incorrecto", Toast.LENGTH_SHORT).show()
                         // Regresar a MainScreen
