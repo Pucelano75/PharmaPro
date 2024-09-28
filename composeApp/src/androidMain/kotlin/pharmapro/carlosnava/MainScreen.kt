@@ -2,16 +2,16 @@ package pharmapro.carlosnava
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource // Importa esto para acceder a los recursos
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pharmapro.carlosnava.R
 
 @Composable
 fun MainScreen() {
@@ -22,11 +22,14 @@ fun MainScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "PharmaPro", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = "PharmaPro",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Usar painterResource para cargar la imagen de recursos
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo",
@@ -35,13 +38,35 @@ fun MainScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = { /* Acción para inicio de sesión */ }) {
+        // Botón de "Inicio de sesión" con bordes redondeados y colores personalizados
+        Button(
+            onClick = { /* Acción para inicio de sesión */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.LightGray, // Fondo gris claro
+                contentColor = Color.Black // Texto negro
+            )
+        ) {
             Text(text = "Inicio de sesión")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /* Acción para nuevo usuario */ }) {
+        // Botón de "Nuevo usuario" con bordes redondeados y colores personalizados
+        Button(
+            onClick = { /* Acción para nuevo usuario */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Gray, // Fondo gris medio
+                contentColor = Color.Black // Texto negro
+            )
+        ) {
             Text(text = "Nuevo usuario")
         }
     }
