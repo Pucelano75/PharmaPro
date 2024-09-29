@@ -33,5 +33,6 @@ fun Navigation() {
         composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen(navController = navController) }
         composable("home") { HomeScreen(navController) }
+        composable("registerMedication") { RegisterMedicationScreen(navController) }
     }
 }
