@@ -1,11 +1,16 @@
 package pharmapro.carlosnava
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -26,10 +31,11 @@ fun HomeScreen(navController: NavController) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Home") },
+                    title = { Text("") }, // Dejar título vacío
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Text("Menú") // Texto en lugar de un ícono
+                        IconButton(onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier.padding(start = 16.dp)) { // Agregar padding
+                            Icon(Icons.Filled.Menu, contentDescription = "Menú")
                         }
                     }
                 )
@@ -45,28 +51,66 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp), // Mayor espaciado alrededor
+        horizontalAlignment = Alignment.CenterHorizontally, // Centrar los botones horizontalmente
+        verticalArrangement = Arrangement.Center // Centrar verticalmente
     ) {
-        TextButton(onClick = {
-            navController.navigate("registerMedication")
-            scope.launch { drawerState.close() } // Cerrar el menú
-        }) {
-            Text("Registrar Medicación")
+        // Espaciador para separar el botón hamburguesa de los botones del menú
+        Spacer(modifier = Modifier.height(100.dp))
+
+        // Botón 1: Registrar Medicación
+        Button(
+            onClick = {
+                navController.navigate("registerMedication")
+                scope.launch { drawerState.close() } // Cerrar el menú
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp) // Espacio entre los botones
+        ) {
+            Text(
+                "Registrar Medicación",
+                fontSize = 18.sp, // Tamaño de texto más grande
+                fontWeight = FontWeight.Bold
+            )
         }
 
-        TextButton(onClick = {
-            navController.navigate("programming")
-            scope.launch { drawerState.close() }
-        }) {
-            Text("Programación")
+        // Botón 2: Programación
+        Button(
+            onClick = {
+                navController.navigate("programming")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                "Programación",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
-        TextButton(onClick = {
-            navController.navigate("records")
-            scope.launch { drawerState.close() }
-        }) {
-            Text("Registros")
+        // Botón 3: Registros
+        Button(
+            onClick = {
+                navController.navigate("records")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                "Registros",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
+
 
