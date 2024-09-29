@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permiso para usar NFC -->
+    <uses-permission android:name="android.permission.NFC" />
+
+    <!-- Indicar que la app requiere NFC -->
+    <uses-feature android:name="android.hardware.nfc" android:required="true"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
