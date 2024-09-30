@@ -1,48 +1,33 @@
 package pharmapro.carlosnava
 
 import android.content.Context
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.nfc.NfcAdapter
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
+import android.nfc.tech.Ndef
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
-import androidx.compose.material3.SnackbarDuration // Asegúrate de tener esta importación
+import java.nio.charset.Charset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterMedicationScreen(navController: NavController) {
     var medicationName by remember { mutableStateOf("") }
     var reason by remember { mutableStateOf("") }
-    var observations by remember { mutableStateOf("") }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    var nfcMessage by remember { mutableStateOf("Acerque una etiqueta NFC para guardar los datos.") }
+    var isWritingNfc by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(context)
 
     Scaffold(
         topBar = {
@@ -54,8 +39,7 @@ fun RegisterMedicationScreen(navController: NavController) {
                     }
                 }
             )
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -81,57 +65,54 @@ fun RegisterMedicationScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text("Observaciones:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = observations,
-                onValueChange = { observations = it },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 3
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    saveMedicationData(navController.context, medicationName, reason, observations)
-
-                    // Mostrar Snackbar de confirmación dentro de una coroutine
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = "Datos guardados correctamente.",
-                            duration = SnackbarDuration.Long // Aumenta la duración
-                        )
+                    if (nfcAdapter != null) {
+                        isWritingNfc = true
+                        nfcMessage = "Acércate una etiqueta NFC para escribir los datos."
+                    } else {
+                        nfcMessage = "El dispositivo no soporta NFC."
                     }
-
-                    navController.popBackStack()
                 },
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Guardar")
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(nfcMessage, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+
+            // Lógica para escribir en una etiqueta NFC cuando esté disponible
+            if (isWritingNfc) {
+                LaunchedEffect(Unit) {
+                    nfcAdapter?.enableReaderMode(
+                        context as android.app.Activity,
+                        { tag ->
+                            val ndef = Ndef.get(tag)
+                            if (ndef != null) {
+                                ndef.connect()
+                                val message = "$medicationName;$reason"
+                                val ndefMessage = NdefMessage(
+                                    arrayOf(
+                                        NdefRecord.createTextRecord("en", message)
+                                    )
+                                )
+                                ndef.writeNdefMessage(ndefMessage)
+                                ndef.close()
+                                nfcMessage = "Datos guardados en la etiqueta NFC con éxito."
+                                isWritingNfc = false
+                            }
+                        },
+                        NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B,
+                        null
+                    )
+                }
+            }
         }
     }
 }
 
-// Función para guardar los datos en SharedPreferences
-fun saveMedicationData(context: Context, name: String, reason: String, observations: String) {
-    val sharedPreferences = context.getSharedPreferences("MedicationPrefs", Context.MODE_PRIVATE)
-    with(sharedPreferences.edit()) {
-        putString("medicationName", name)
-        putString("reason", reason)
-        putString("observations", observations)
-        apply()
-    }
-}
-
-// Función para cargar los datos desde SharedPreferences (opcional)
-fun loadMedicationData(context: Context): Triple<String?, String?, String?> {
-    val sharedPreferences = context.getSharedPreferences("MedicationPrefs", Context.MODE_PRIVATE)
-    val name = sharedPreferences.getString("medicationName", null)
-    val reason = sharedPreferences.getString("reason", null)
-    val observations = sharedPreferences.getString("observations", null)
-    return Triple(name, reason, observations)
-}
 
