@@ -54,6 +54,9 @@ fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(context)
 
+    // Almacenar en SharedPreferences
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+
     var nfcDetected by remember { mutableStateOf(false) }
     var nfcMessage by remember { mutableStateOf("Acerque su dispositivo a la medicación para registrar la toma.") }
     var nfcDetails by remember { mutableStateOf("") }
@@ -76,9 +79,20 @@ fun HomeScreen(navController: NavController) {
                 val medicationName = parts.getOrNull(0) ?: "Desconocido"
                 val reason = parts.getOrNull(1) ?: "Desconocido"
 
+                // Obtener la fecha y hora actuales
+                val currentDateTime = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
+
                 // Mostrar los datos leídos de la tarjeta NFC
                 nfcMessage = "Medicamento: $medicationName\nMotivo: $reason"
                 nfcDetected = true
+
+                // Guardar los datos en SharedPreferences
+                val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                val record = "Medicamento: $medicationName\nMotivo: $reason\nFecha y Hora: $currentDateTime\n\n"
+                editor.putString("medicationRecords", (sharedPreferences.getString("medicationRecords", "") ?: "") + record)
+                editor.apply() // Aplicar cambios
+
             } else {
                 nfcMessage = "No se encontraron datos en la etiqueta NFC."
             }
@@ -154,6 +168,14 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+// Función para guardar los detalles del medicamento en SharedPreferences
+private fun saveMedicationDetails(sharedPreferences: SharedPreferences, medicationName: String, reason: String) {
+    val editor = sharedPreferences.edit()
+    val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+    editor.putString("lastMedication", "$medicationName;$reason;$currentDate")
+    editor.apply()
+}
+
 @Composable
 fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
     Column(
@@ -217,6 +239,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
         }
     }
 }
+
 
 
 
