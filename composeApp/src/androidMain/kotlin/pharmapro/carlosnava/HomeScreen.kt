@@ -1,6 +1,9 @@
 package pharmapro.carlosnava
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.nfc.NfcAdapter
+import android.nfc.tech.Ndef
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,23 +42,49 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.nio.charset.Charset
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current // Obtener el contexto desde el Composable
+    val context = LocalContext.current
     val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(context)
 
     var nfcDetected by remember { mutableStateOf(false) }
     var nfcMessage by remember { mutableStateOf("Acerque su dispositivo a la medicación para registrar la toma.") }
+    var nfcDetails by remember { mutableStateOf("") }
 
     // Callback para cuando se detecte una etiqueta NFC
     val nfcCallback = NfcAdapter.ReaderCallback { tag ->
-        // Acción cuando la etiqueta NFC es detectada
-        nfcMessage = "Etiqueta NFC detectada. Registro de toma exitoso."
-        nfcDetected = true
+        val ndef = Ndef.get(tag)
+        if (ndef != null) {
+            ndef.connect()
+            val ndefMessage = ndef.ndefMessage
+            val records = ndefMessage.records
+
+            // Verificar si el mensaje tiene datos
+            if (records.isNotEmpty()) {
+                val payload = records[0].payload
+                val message = String(payload, Charset.forName("UTF-8"))
+
+                // Asumimos que el mensaje está en formato "medicationName;reason"
+                val parts = message.split(";")
+                val medicationName = parts.getOrNull(0) ?: "Desconocido"
+                val reason = parts.getOrNull(1) ?: "Desconocido"
+
+                // Mostrar los datos leídos de la tarjeta NFC
+                nfcMessage = "Medicamento: $medicationName\nMotivo: $reason"
+                nfcDetected = true
+            } else {
+                nfcMessage = "No se encontraron datos en la etiqueta NFC."
+            }
+
+            ndef.close()
+        }
     }
 
     // Configura el adaptador NFC si está disponible
@@ -80,28 +109,46 @@ fun HomeScreen(navController: NavController) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("") }, // Dejar título vacío
+                    title = { Text("") },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } },
-                            modifier = Modifier.padding(start = 16.dp)) { // Agregar padding
+                        IconButton(
+                            onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menú")
                         }
                     }
                 )
             }
         ) { innerPadding ->
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    // Mostrar los detalles del NFC
+                    if (nfcDetected) {
+                        Text(
+                            text = nfcDetails,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black
+                        )
+                    }
 
-                // Mostrar el mensaje de NFC
-                Text(
-                    text = nfcMessage, // Asegúrate de pasar 'text' como argumento
-                    modifier = Modifier.align(Alignment.Center),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (nfcDetected) Color.Green else Color.Black
-                )
+                    // Mostrar el mensaje de confirmación del registro
+                    Text(
+                        text = nfcMessage,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (nfcDetected) Color.Green else Color.Black,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
             }
         }
     }
@@ -112,26 +159,25 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp), // Mayor espaciado alrededor
-        horizontalAlignment = Alignment.CenterHorizontally, // Centrar los botones horizontalmente
-        verticalArrangement = Arrangement.Center // Centrar verticalmente
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // Espaciador para separar el botón hamburguesa de los botones del menú
         Spacer(modifier = Modifier.height(100.dp))
 
         // Botón 1: Registrar Medicación
         Button(
             onClick = {
                 navController.navigate("registerMedication")
-                scope.launch { drawerState.close() } // Cerrar el menú
+                scope.launch { drawerState.close() }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp) // Espacio entre los botones
+                .padding(vertical = 8.dp)
         ) {
             Text(
                 "Registrar Medicación",
-                fontSize = 18.sp, // Tamaño de texto más grande
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         }
