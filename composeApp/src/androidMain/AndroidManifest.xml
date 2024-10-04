@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    tools:ignore="ExtraText">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Permiso para usar NFC -->
     <uses-permission android:name="android.permission.NFC" />
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
 
     <!-- Permisos adicionales -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
 
     <application
         android:allowBackup="true"
@@ -24,41 +22,25 @@
         <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            tools:ignore="WrongManifestParent"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode">
-
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
-            <!-- Intent Filter para NFC -->
+        <!-- BroadcastReceiver para NFC -->
+        <receiver android:name="pharmapro.carlosnava.NfcBroadcastReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-            <!-- Meta-data para manejar tecnologías NFC -->
-            <meta-data
-                android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-        </activity> <!-- Cierre correcto de la actividad -->
-
-        <!-- BroadcastReceiver para NFC -->
-        <receiver android:name=".NfcBroadcastReceiver"
-            android:exported="false"
-            tools:ignore="WrongManifestParent">
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
             </intent-filter>
         </receiver>
 
         <!-- Receiver para recibir eventos tras el reinicio -->
         <receiver android:name=".BootReceiver"
             android:enabled="true"
-            android:exported="false"
-            tools:ignore="WrongManifestParent">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -66,6 +48,7 @@
         </receiver>
 
     </application>
-
 </manifest>
+
+
 
