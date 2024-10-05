@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -16,7 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,16 +26,16 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
-        
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation("io.coil-kt:coil-compose:2.4.0") //para cargar la imagen del logo
+            implementation("io.coil-kt:coil-compose:2.4.0") // Para cargar la imagen del logo
             implementation("androidx.compose.material3:material3:1.3.0")
             implementation("androidx.compose.material:material-icons-extended:1.3.0")
         }
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -46,11 +45,11 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+            implementation(libs.kotlinx.coroutines.core)
             implementation("androidx.navigation:navigation-compose:2.5.3")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
             implementation("androidx.compose.material3:material3:1.3.0")
-
+            implementation("androidx.compose.ui:ui-text-google-fonts:1.0.1") // Para fuentes de Google
         }
     }
 }
@@ -70,28 +69,31 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
     }
+
     dependencies {
         debugImplementation(compose.uiTooling)
     }
 }
-dependencies {
-    implementation(libs.androidbrowserhelper)
-}
+
 

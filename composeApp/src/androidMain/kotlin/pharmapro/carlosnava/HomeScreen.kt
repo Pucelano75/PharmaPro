@@ -4,14 +4,19 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.nfc.NfcAdapter
 import android.nfc.tech.Ndef
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -20,6 +25,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,16 +42,76 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+
+@Composable
+fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .background(Color.LightGray), // Fondo gris claro
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
+    ) {
+        // Botón para registrar medicación
+        Button(
+            onClick = {
+                navController.navigate("registerMedicationScreen")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(text = "Registrar medicación", fontSize = 18.sp)
+        }
+
+        // Botón para programación
+        Button(
+            onClick = {
+                navController.navigate("programmingScreen")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(text = "Programación", fontSize = 18.sp)
+        }
+
+        // Botón para registros
+        Button(
+            onClick = {
+                navController.navigate("recordsScreen")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(text = "Registros", fontSize = 18.sp)
+        }
+
+        // Botón para cerrar el menú
+        Button(
+            onClick = {
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(text = "Cerrar menú", fontSize = 18.sp)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +126,6 @@ fun HomeScreen(navController: NavController) {
 
     var nfcDetected by remember { mutableStateOf(false) }
     var nfcMessage by remember { mutableStateOf("Acerque su dispositivo a la medicación para registrar la toma.") }
-    var nfcDetails by remember { mutableStateOf("") }
 
     // Callback para cuando se detecte una etiqueta NFC
     val nfcCallback = NfcAdapter.ReaderCallback { tag ->
@@ -70,30 +135,21 @@ fun HomeScreen(navController: NavController) {
             val ndefMessage = ndef.ndefMessage
             val records = ndefMessage.records
 
-            // Verificar si el mensaje tiene datos
             if (records.isNotEmpty()) {
                 val payload = records[0].payload
                 val message = String(payload, Charset.forName("UTF-8"))
-
-                // Asumimos que el mensaje está en formato "medicationName;reason"
                 val parts = message.split(";")
                 val medicationName = parts.getOrNull(0) ?: "Desconocido"
                 val reason = parts.getOrNull(1) ?: "Desconocido"
 
-                // Obtener la fecha y hora actuales
                 val currentDateTime = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
-
-                // Mostrar los datos leídos de la tarjeta NFC
                 nfcMessage = "Medicamento: $medicationName\nMotivo: $reason"
                 nfcDetected = true
 
-                // Guardar los datos en SharedPreferences
-                val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
                 val editor = sharedPreferences.edit()
                 val record = "Medicamento: $medicationName\nMotivo: $reason\nFecha y Hora: $currentDateTime\n\n"
                 editor.putString("medicationRecords", (sharedPreferences.getString("medicationRecords", "") ?: "") + record)
-                editor.apply() // Aplicar cambios
-
+                editor.apply()
             } else {
                 nfcMessage = "No se encontraron datos en la etiqueta NFC."
             }
@@ -114,20 +170,29 @@ fun HomeScreen(navController: NavController) {
         }
     }
 
-    // Usamos ModalNavigationDrawer para manejar el menú lateral
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerContent(navController, drawerState, scope)
+            DrawerContent(navController, drawerState, scope)  // Usar el DrawerContent
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("") },
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = pharmapro.carlosnava.R.drawable.logo),
+                                contentDescription = "Logo de PharmaPro",
+                                modifier = Modifier.size(50.dp) // Tamaño más pequeño para el logo
+                            )
+                            Spacer(modifier = Modifier.width(12.dp)) // Espacio entre el logo y el texto
+                            Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 40.sp)
+                        }
+                    },
                     navigationIcon = {
                         IconButton(
-                            onClick = { scope.launch { drawerState.open() } },
+                            onClick = { scope.launch { drawerState.open() } }, // Abrir el Drawer
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menú")
@@ -143,25 +208,23 @@ fun HomeScreen(navController: NavController) {
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Top
                 ) {
-                    // Mostrar los detalles del NFC
-                    if (nfcDetected) {
-                        Text(
-                            text = nfcDetails,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.Black
-                        )
-                    }
+                    Text(
+                        text = "Bienvenido a PharmaPro",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
+                    )
 
-                    // Mostrar el mensaje de confirmación del registro
+                    Spacer(modifier = Modifier.weight(1f))
+
                     Text(
                         text = nfcMessage,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (nfcDetected) Color.Green else Color.Black,
-                        modifier = Modifier.padding(top = 16.dp)
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 32.dp)
                     )
                 }
             }
@@ -169,77 +232,14 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-// Función para guardar los detalles del medicamento en SharedPreferences
-private fun saveMedicationDetails(sharedPreferences: SharedPreferences, medicationName: String, reason: String) {
-    val editor = sharedPreferences.edit()
-    val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-    editor.putString("lastMedication", "$medicationName;$reason;$currentDate")
-    editor.apply()
-}
 
-@Composable
-fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Spacer(modifier = Modifier.height(100.dp))
 
-        // Botón 1: Registrar Medicación
-        Button(
-            onClick = {
-                navController.navigate("registerMedication")
-                scope.launch { drawerState.close() }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(
-                "Registrar Medicación",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
 
-        // Botón 2: Programación
-        Button(
-            onClick = {
-                navController.navigate("programming")
-                scope.launch { drawerState.close() }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(
-                "Programación",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
 
-        // Botón 3: Registros
-        Button(
-            onClick = {
-                navController.navigate("records")
-                scope.launch { drawerState.close() }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(
-                "Registros",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
+
+
+
+
 
 
 
