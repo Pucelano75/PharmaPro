@@ -56,10 +56,11 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
+
 fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .wrapContentSize() // Cambiado a wrapContentSize para que ocupe solo el espacio necesario
             .padding(16.dp)
             .background(Color.LightGray), // Fondo gris claro
         verticalArrangement = Arrangement.Top,
@@ -67,13 +68,14 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
     ) {
         // Ancho deseado para los botones (ajusta según sea necesario)
         val buttonWidth = 280.dp
+
         // Botón para registrar medicación
         Button(
             onClick = {
                 navController.navigate("registerMedication")
                 scope.launch { drawerState.close() }
             },
-            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            modifier = Modifier.width(buttonWidth).padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp), // Esquinas redondeadas más pronunciadas
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE)) // Color de fondo personalizado
         ) {
@@ -83,10 +85,10 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
         // Botón para programación
         Button(
             onClick = {
-                navController.navigate("registerMedication")
+                navController.navigate("programming")
                 scope.launch { drawerState.close() }
             },
-            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            modifier = Modifier.width(buttonWidth).padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
@@ -99,7 +101,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
                 navController.navigate("records")
                 scope.launch { drawerState.close() }
             },
-            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            modifier = Modifier.width(buttonWidth).padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
@@ -111,7 +113,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
             onClick = {
                 scope.launch { drawerState.close() }
             },
-            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            modifier = Modifier.width(buttonWidth).padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
@@ -119,6 +121,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
