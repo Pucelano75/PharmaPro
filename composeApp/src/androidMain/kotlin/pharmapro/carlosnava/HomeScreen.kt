@@ -12,14 +12,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,40 +65,45 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+        // Ancho deseado para los botones (ajusta según sea necesario)
+        val buttonWidth = 280.dp
         // Botón para registrar medicación
         Button(
             onClick = {
-                navController.navigate("registerMedicationScreen")
+                navController.navigate("registerMedication")
                 scope.launch { drawerState.close() }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            shape = RoundedCornerShape(8.dp)
+            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp), // Esquinas redondeadas más pronunciadas
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE)) // Color de fondo personalizado
         ) {
-            Text(text = "Registrar medicación", fontSize = 18.sp)
+            Text(text = "Registrar medicación", fontSize = 18.sp, color = Color.White) // Texto blanco
         }
 
         // Botón para programación
         Button(
             onClick = {
-                navController.navigate("programmingScreen")
+                navController.navigate("registerMedication")
                 scope.launch { drawerState.close() }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            shape = RoundedCornerShape(8.dp)
+            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
-            Text(text = "Programación", fontSize = 18.sp)
+            Text(text = "Programación", fontSize = 18.sp, color = Color.White)
         }
 
         // Botón para registros
         Button(
             onClick = {
-                navController.navigate("recordsScreen")
+                navController.navigate("records")
                 scope.launch { drawerState.close() }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            shape = RoundedCornerShape(8.dp)
+            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
-            Text(text = "Registros", fontSize = 18.sp)
+            Text(text = "Registros", fontSize = 18.sp, color = Color.White)
         }
 
         // Botón para cerrar el menú
@@ -105,10 +111,11 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
             onClick = {
                 scope.launch { drawerState.close() }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            shape = RoundedCornerShape(8.dp)
+            modifier =  Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
         ) {
-            Text(text = "Cerrar menú", fontSize = 18.sp)
+            Text(text = "Cerrar menú", fontSize = 18.sp, color = Color.White)
         }
     }
 }
@@ -180,20 +187,20 @@ fun HomeScreen(navController: NavController) {
             topBar = {
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 16.dp) ){
                             Image(
                                 painter = painterResource(id = pharmapro.carlosnava.R.drawable.logo),
                                 contentDescription = "Logo de PharmaPro",
                                 modifier = Modifier.size(50.dp) // Tamaño más pequeño para el logo
                             )
                             Spacer(modifier = Modifier.width(12.dp)) // Espacio entre el logo y el texto
-                            Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 40.sp)
+                            Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 34.sp, color = Color.Gray, modifier = Modifier.padding(vertical = 8.dp))
                         }
                     },
                     navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }, // Abrir el Drawer
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menú")
                         }
@@ -205,6 +212,7 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .wrapContentSize(Alignment.TopStart)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -214,6 +222,7 @@ fun HomeScreen(navController: NavController) {
                         text = "Bienvenido a PharmaPro",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
                         modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
                     )
 
@@ -231,6 +240,7 @@ fun HomeScreen(navController: NavController) {
         }
     }
 }
+
 
 
 

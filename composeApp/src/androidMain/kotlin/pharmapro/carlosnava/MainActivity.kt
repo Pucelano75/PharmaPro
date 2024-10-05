@@ -3,7 +3,6 @@ package pharmapro.carlosnava
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import androidx.core.content.ContextCompat
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -16,7 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.navigation.NavController
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
