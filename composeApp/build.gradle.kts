@@ -28,28 +28,39 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation("io.coil-kt:coil-compose:2.4.0") // Para cargar la imagen del logo
-            implementation("androidx.compose.material3:material3:1.3.0")
-            implementation("androidx.compose.material:material-icons-extended:1.3.0")
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.material) // Material 2 para compatibilidad
+                implementation(compose.components.resources)
+                implementation(libs.kotlinx.coroutines.core)
+            }
         }
 
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.material) // Material 2, por si lo necesitas también
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.kotlinx.coroutines.core)
-            implementation("androidx.navigation:navigation-compose:2.5.3")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-            implementation("androidx.compose.material3:material3:1.3.0")
-            implementation("androidx.compose.ui:ui-text-google-fonts:1.0.1") // Para fuentes de Google
+        val androidMain by getting {
+            dependencies {
+                implementation(compose.preview)
+                implementation(libs.androidx.activity.compose)
+                implementation("androidx.compose.material3:material3:1.3.0")
+                implementation("androidx.compose.material:material-icons-extended:1.3.0")
+                implementation("io.coil-kt:coil-compose:2.4.0") // Cargar imagen del logo en Android
+                implementation("androidx.navigation:navigation-compose:2.5.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+            }
+        }
+
+        val iosMain by creating {
+            dependencies {
+                // Agregar dependencias específicas de iOS si las necesitas
+            }
+        }
+
+        val iosTest by creating {
+            dependencies {
+                // Dependencias para pruebas en iOS
+            }
         }
     }
 }
@@ -95,5 +106,6 @@ android {
         debugImplementation(compose.uiTooling)
     }
 }
+
 
 

@@ -222,11 +222,17 @@ fun HomeScreen(navController: NavController) {
                     verticalArrangement = Arrangement.Top
                 ) {
                     Text(
-                        text = "Bienvenido a PharmaPro",
+                        text = "Acerque su dispositivo a la etiqueta NFC",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,
-                        modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
+                        modifier = Modifier.padding(top = 30.dp, bottom = 70.dp)
+                    )
+
+                    Image(
+                        painter = painterResource(id = pharmapro.carlosnava.R.drawable.imagen_nfc), // Ruta a tu imagen
+                        contentDescription = "Icono de NFC",
+                        modifier = Modifier.size(200.dp) // Ajusta el tamaño de la imagen según sea necesario
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
