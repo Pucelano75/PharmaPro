@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -135,7 +136,7 @@ fun HomeScreen(navController: NavController) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
 
     var nfcDetected by remember { mutableStateOf(false) }
-    var nfcMessage by remember { mutableStateOf("Acerque su dispositivo a la medicación para registrar la toma.") }
+    var nfcMessage by remember { mutableStateOf("Datos de su toma:") }
 
     // Callback para cuando se detecte una etiqueta NFC
     val nfcCallback = NfcAdapter.ReaderCallback { tag ->
@@ -148,18 +149,22 @@ fun HomeScreen(navController: NavController) {
             if (records.isNotEmpty()) {
                 val payload = records[0].payload
                 val message = String(payload, Charset.forName("UTF-8"))
-                val parts = message.split(";")
+                val parts = message.split(";").map { it.trim() }
                 val medicationName = parts.getOrNull(0) ?: "Desconocido"
                 val reason = parts.getOrNull(1) ?: "Desconocido"
 
                 val currentDateTime = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
-                nfcMessage = "Medicamento: $medicationName\nMotivo: $reason"
+                nfcMessage = "Medicamento: $medicationName\nMotivo: $reason\n\nRegistro realizado correctamente. Puede consultarlo en el menú 'Registros'.\""
                 nfcDetected = true
 
                 val editor = sharedPreferences.edit()
                 val record = "Medicamento: $medicationName\nMotivo: $reason\nFecha y Hora: $currentDateTime\n\n"
                 editor.putString("medicationRecords", (sharedPreferences.getString("medicationRecords", "") ?: "") + record)
                 editor.apply()
+
+
+
+
             } else {
                 nfcMessage = "No se encontraron datos en la etiqueta NFC."
             }
@@ -180,30 +185,41 @@ fun HomeScreen(navController: NavController) {
         }
     }
 
+    // Manejo de los 20 segundos para limpiar el mensaje
+    LaunchedEffect(nfcDetected) {
+        if (nfcDetected) {
+            kotlinx.coroutines.delay(20000) // Espera de 20 segundos
+            nfcMessage = "Datos de su toma: "
+            var showNfcMessage = false // Ocultar el mensaje después de 20 segundos
+
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             DrawerContent(navController, drawerState, scope)  // Usar el DrawerContent
         }
+
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 16.dp) ){
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 4.dp) ){
                             Image(
                                 painter = painterResource(id = pharmapro.carlosnava.R.drawable.logo),
                                 contentDescription = "Logo de PharmaPro",
                                 modifier = Modifier.size(50.dp) // Tamaño más pequeño para el logo
                             )
-                            Spacer(modifier = Modifier.width(12.dp)) // Espacio entre el logo y el texto
-                            Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 34.sp, color = Color.Gray, modifier = Modifier.padding(vertical = 8.dp))
+                            Spacer(modifier = Modifier.width(20.dp)) // Espacio entre el logo y el texto
+                            Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 34.sp, color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
                         }
                     },
                     navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }, // Abrir el Drawer
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier.padding(start = 0.dp)
                         ) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menú")
                         }
@@ -219,14 +235,18 @@ fun HomeScreen(navController: NavController) {
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.Top),
+                    modifier = Modifier.padding(top = 20.dp)
+
                 ) {
                     Text(
-                        text = "Acerque su dispositivo a la etiqueta NFC",
+                        text = "Acerque su dispositivo a la etiqueta NFC de la medicación",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,
-                        modifier = Modifier.padding(top = 30.dp, bottom = 70.dp)
+                        fontSize = 20.sp,
+
+                        modifier = Modifier.padding( start = 20.dp, top = 15.dp, bottom = 70.dp)
                     )
 
                     Image(
@@ -235,13 +255,13 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.size(200.dp) // Ajusta el tamaño de la imagen según sea necesario
                     )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(40.dp))
 
                     Text(
                         text = nfcMessage,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.Gray,
+                        color = Color(0xFF4CAF50),
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
                 }
