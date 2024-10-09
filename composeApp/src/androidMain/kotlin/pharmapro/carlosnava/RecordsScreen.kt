@@ -1,82 +1,117 @@
 package pharmapro.carlosnava
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Divider
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun RecordsScreen() {
+fun RecordsScreen(navController: NavController) {
     val context = LocalContext.current
-    val sharedPreferences: SharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+    val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
 
-    // Obtener los registros de medicación guardados
-    val medicationRecordsString = sharedPreferences.getString("medicationRecords", "") ?: ""
-    val medicationRecords = medicationRecordsString.split("\n\n").filter { it.isNotBlank() }
+    // Recuperar registros guardados
+    val medicationRecords = remember {
+        mutableStateOf(
+            sharedPreferences.getString("medicationRecords", "")?.split("\n\n")
+                ?.filter { it.isNotEmpty() } ?: emptyList()
+        )
+    }
+    val selectedRecords = remember { mutableStateOf(mutableSetOf<Int>()) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .padding(16.dp)
     ) {
         Text(
             text = "Registros de Medicación",
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.headlineMedium, // headlineMedium en lugar de h5
             fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Barra de desplazamiento
+        // Lista de registros
         LazyColumn(
-            modifier = Modifier.weight(1f) // Asigna el peso para llenar el espacio disponible
+            modifier = Modifier.weight(1f) // para que la columna ocupe el espacio disponible
         ) {
-            items(medicationRecords) { record ->
-                Column {
-                    Text(
-                        text = record,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Normal,
-                        modifier = Modifier.padding(vertical = 4.dp)
+            itemsIndexed(medicationRecords.value) { index, record ->
+                val isSelected = selectedRecords.value.contains(index)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = isSelected,
+                        onCheckedChange = { isChecked ->
+                            val updatedSelected = selectedRecords.value.toMutableSet()
+                            if (isChecked) {
+                                updatedSelected.add(index)
+                            } else {
+                                updatedSelected.remove(index)
+                            }
+                            selectedRecords.value = updatedSelected
+                        }
                     )
-                    Box(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color.Gray)) // Como separador
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = record, modifier = Modifier.weight(1f))
                 }
+                Divider(color = Color.Gray, thickness = 1.dp) // Línea separadora entre registros
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para eliminar todos los registros
-        Button(
-            onClick = {
-                val editor = sharedPreferences.edit()
-                editor.remove("medicationRecords") // Elimina los registros
-                editor.apply() // Aplicar cambios
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Eliminar Todos los Registros",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+        // Mostrar el botón de eliminar si hay registros seleccionados
+        if (selectedRecords.value.isNotEmpty()) {
+            Button(
+                onClick = {
+                    // Eliminar registros seleccionados
+                    medicationRecords.value = medicationRecords.value.filterIndexed { index, _ ->
+                        !selectedRecords.value.contains(index)
+                    }
+                    // Guardar los registros actualizados en SharedPreferences
+                    sharedPreferences.edit()
+                        .putString("medicationRecords", medicationRecords.value.joinToString("\n\n"))
+                        .apply()
+                    selectedRecords.value.clear() // Limpiar la selección
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Eliminar Seleccionados")
+            }
         }
     }
 }
+
+
+
 
 
 
