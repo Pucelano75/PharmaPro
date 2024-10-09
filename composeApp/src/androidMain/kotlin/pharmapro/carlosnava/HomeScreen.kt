@@ -45,7 +45,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -136,7 +139,10 @@ fun HomeScreen(navController: NavController) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
 
     var nfcDetected by remember { mutableStateOf(false) }
-    var nfcMessage by remember { mutableStateOf("Datos de su toma:") }
+    var nfcMessage by remember { mutableStateOf(buildAnnotatedString { append("Datos de su toma:") }) }
+
+
+
 
     // Callback para cuando se detecte una etiqueta NFC
     val nfcCallback = NfcAdapter.ReaderCallback { tag ->
@@ -148,13 +154,29 @@ fun HomeScreen(navController: NavController) {
 
             if (records.isNotEmpty()) {
                 val payload = records[0].payload
-                val message = String(payload, Charset.forName("UTF-8"))
+                val languageCodeLength = payload[0].toInt() and 0x3F
+                val message = String(payload, languageCodeLength + 1, payload.size - languageCodeLength - 1, Charset.forName("UTF-8"))
                 val parts = message.split(";").map { it.trim() }
                 val medicationName = parts.getOrNull(0) ?: "Desconocido"
                 val reason = parts.getOrNull(1) ?: "Desconocido"
 
                 val currentDateTime = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date())
-                nfcMessage = "Medicamento: $medicationName\nMotivo: $reason\n\nRegistro realizado correctamente. Puede consultarlo en el menú 'Registros'.\""
+
+                nfcMessage = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)) {
+                        append("Medicamento: $medicationName\n")
+                    }
+                    withStyle(style = SpanStyle(
+                        color = Color(0xFF4CAF50),
+                        fontWeight = FontWeight.Bold
+                    )) {
+                        append("Motivo: $reason\n\n")
+                    }
+                    withStyle(style = SpanStyle(color = Color.Gray)) {
+                        append("Registro realizado correctamente. Puede consultarlo en el menú 'Registros'.")
+                    }
+                }
+
                 nfcDetected = true
 
                 val editor = sharedPreferences.edit()
@@ -166,7 +188,7 @@ fun HomeScreen(navController: NavController) {
 
 
             } else {
-                nfcMessage = "No se encontraron datos en la etiqueta NFC."
+                nfcMessage = buildAnnotatedString { append("No se encontraron datos en la etiqueta NFC.") }
             }
 
             ndef.close()
@@ -189,8 +211,8 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(nfcDetected) {
         if (nfcDetected) {
             kotlinx.coroutines.delay(20000) // Espera de 20 segundos
-            nfcMessage = "Datos de su toma: "
-            var showNfcMessage = false // Ocultar el mensaje después de 20 segundos
+            nfcMessage = buildAnnotatedString { append("Datos de su toma:") }
+            nfcDetected = false // Ocultar el mensaje después de 20 segundos
 
         }
     }
@@ -259,9 +281,9 @@ fun HomeScreen(navController: NavController) {
 
                     Text(
                         text = nfcMessage,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF4CAF50),
+                        fontSize = if (nfcDetected) 16.sp else 20.sp, // Tamaño de 16sp cuando se detecta NFC
+                        fontWeight = if (nfcDetected) FontWeight.Normal else FontWeight.Medium, // Peso normal si es NFC
+                        color = if (nfcDetected) Color.Gray else Color(0xFF4CAF50), // Color gris si es un mensaje de éxito
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
                 }
