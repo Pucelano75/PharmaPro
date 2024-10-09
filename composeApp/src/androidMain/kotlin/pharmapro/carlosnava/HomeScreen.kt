@@ -48,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,11 +65,12 @@ import java.util.Locale
 fun DrawerContent(navController: NavController, drawerState: DrawerState, scope: CoroutineScope) {
     Column(
         modifier = Modifier
-            .wrapContentSize() // Cambiado a wrapContentSize para que ocupe solo el espacio necesario
+            .fillMaxSize()
             .padding(16.dp)
             .background(Color.LightGray), // Fondo gris claro
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         // Ancho deseado para los botones (ajusta según sea necesario)
         val buttonWidth = 280.dp
@@ -123,6 +125,13 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
         ) {
             Text(text = "Cerrar menú", fontSize = 18.sp, color = Color.White)
         }
+        // Texto adicional debajo de los botones
+        Text(
+            text = "Recuerde pegar la etiqueta NFC en la caja de medicación en un lugar de fácil lectura con su dispositivo móvil",
+            color = Color.Gray,
+            modifier = Modifier.padding(top = 16.dp), // Espacio en la parte superior del texto
+            textAlign = TextAlign.Center // Alinear el texto al centro
+        )
     }
 }
 
