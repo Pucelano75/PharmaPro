@@ -1,5 +1,4 @@
 package pharmapro.carlosnava
-
 import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text

@@ -10,15 +10,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import pharmapro.carlosnava.ui.theme.PharmaProTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,8 +49,8 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState) // Asegúrate de que esta línea esté intacta
-        createNotificationChannel(this) // Crear el canal de notificación
+        super.onCreate(savedInstanceState)
+        createNotificationChannel(this)
 
         // Solicitar permisos para notificaciones en Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -87,20 +104,19 @@ class MainActivity : ComponentActivity() {
         val notificationManager = NotificationManagerCompat.from(context)
         notificationManager.notify(1001, builder.build())
     }
-}
 
-@Composable
-fun Navigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "home") {
-        composable("main") { MainScreen(navController) }
-        //composable("register") { RegisterScreen(navController) }
-        //composable("login") { LoginScreen(navController = navController) }
-        composable("home") { HomeScreen(navController) }
-        composable("registerMedication") { RegisterMedicationScreen(navController) }
-        composable("records") { RecordsScreen(navController)  }
+    @Composable
+    fun Navigation() {
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = "splash") {
+            composable("splash") { SplashScreen(navController) }
+            composable("home") { HomeScreen(navController) }
+            composable("registerMedication") { RegisterMedicationScreen(navController) }
+            composable("records") { RecordsScreen(navController) }
+        }
     }
 }
+
 
 
 
