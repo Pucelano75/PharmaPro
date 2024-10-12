@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.nfc.NfcAdapter
 import android.nfc.tech.Ndef
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -150,6 +154,28 @@ fun HomeScreen(navController: NavController) {
     var nfcDetected by remember { mutableStateOf(false) }
     var nfcMessage by remember { mutableStateOf(buildAnnotatedString { append("Datos de su toma:") }) }
 
+    // Animación del logo
+    var logoScale by remember { mutableStateOf(0.5f) }
+    // Animación de la imagen NFC
+    var nfcImageScale by remember { mutableStateOf(0.5f) }
+
+    // Efecto de animación para el logo
+    LaunchedEffect(Unit) {
+        logoScale = 1f // Cambia la escala a 1 al iniciar la pantalla
+    }
+    // Efecto de animación para la imagen NFC
+    LaunchedEffect(Unit) {
+        nfcImageScale = 1f // Cambia la escala a 1 al iniciar la pantalla
+    }
+
+    val animatedScale by animateFloatAsState(
+        targetValue = logoScale,
+        animationSpec = tween(durationMillis = 3000, easing = EaseOutBounce)
+    )
+    val animatedNfcImageScale by animateFloatAsState(
+        targetValue = nfcImageScale,
+        animationSpec = tween(durationMillis = 3000, easing = EaseOutBounce)
+    )
 
 
 
@@ -242,6 +268,7 @@ fun HomeScreen(navController: NavController) {
                                 painter = painterResource(id = pharmapro.carlosnava.R.drawable.logo),
                                 contentDescription = "Logo de PharmaPro",
                                 modifier = Modifier.size(50.dp) // Tamaño más pequeño para el logo
+                                    .scale(animatedScale) // Aplica la escala animada aquí
                             )
                             Spacer(modifier = Modifier.width(20.dp)) // Espacio entre el logo y el texto
                             Text("PharmaPro", fontWeight = FontWeight.Bold, fontSize = 34.sp, color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
@@ -284,6 +311,7 @@ fun HomeScreen(navController: NavController) {
                         painter = painterResource(id = pharmapro.carlosnava.R.drawable.imagen_nfc), // Ruta a tu imagen
                         contentDescription = "Icono de NFC",
                         modifier = Modifier.size(200.dp) // Ajusta el tamaño de la imagen según sea necesario
+                            .scale(animatedNfcImageScale) // Aplica la escala animada aquí
                     )
 
                     Spacer(modifier = Modifier.height(40.dp))
@@ -300,6 +328,7 @@ fun HomeScreen(navController: NavController) {
         }
     }
 }
+
 
 
 
