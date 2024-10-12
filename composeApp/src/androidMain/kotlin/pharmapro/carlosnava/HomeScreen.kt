@@ -152,7 +152,7 @@ fun HomeScreen(navController: NavController) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
 
     var nfcDetected by remember { mutableStateOf(false) }
-    var nfcMessage by remember { mutableStateOf(buildAnnotatedString { append("Datos de su toma:") }) }
+    var nfcMessage by remember { mutableStateOf(buildAnnotatedString { append("Datos de su toma: (esperando lectura)") }) }
 
     // Animación del logo
     var logoScale by remember { mutableStateOf(0.5f) }

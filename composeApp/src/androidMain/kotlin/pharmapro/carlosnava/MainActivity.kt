@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        // Manejo del botón "volver"
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Salir de la app completamente al presionar el botón "volver"
+                finishAffinity() // Cierra la app y todas las actividades
+            }
+        })
 
         setContent {
             PharmaProTheme {
