@@ -1,5 +1,7 @@
 package pharmapro.carlosnava
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import androidx.navigation.NavController
+import java.text.ParseException
 
 @Composable
 fun RecordsScreen(navController: NavController) {
@@ -40,7 +45,10 @@ fun RecordsScreen(navController: NavController) {
         )
     }
     val selectedRecords = remember { mutableStateOf(mutableSetOf<Int>()) }
-
+    // Lógica para chequear recordatorios
+    LaunchedEffect(Unit) {
+        checkMedicationReminders(context)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -109,6 +117,69 @@ fun RecordsScreen(navController: NavController) {
         }
     }
 }
+fun checkMedicationReminders(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+
+    // Recuperar registros guardados
+    val medicationRecords = sharedPreferences.getString("medicationRecords", "")?.split("\n\n")
+        ?.filter { it.isNotEmpty() } ?: emptyList()
+
+    // Recuperar parámetros de programación
+    val dosageFrequency = sharedPreferences.getInt("dosageFrequency", 1) // Frecuencia
+    val dosageInterval = sharedPreferences.getInt("dosageInterval", 0) // Intervalo en horas
+
+    // Obtener la fecha y hora actual
+    val currentTime = System.currentTimeMillis()
+
+    // Aquí puedes almacenar la lógica de comparación
+    for (record in medicationRecords) {
+        // Extraer la fecha y hora del registro
+        val recordTimeString = record.lines().find { it.startsWith("Fecha y Hora:") }
+            ?.removePrefix("Fecha y Hora: ")
+            ?.trim()
+
+        // Verificar que la cadena de fecha y hora no sea nula
+        if (recordTimeString != null) {
+            val recordTime = try {
+                java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(recordTimeString)?.time ?: 0
+            } catch (e: ParseException) {
+                // Manejar la excepción si no se puede analizar la fecha
+                e.printStackTrace()
+                continue // Saltar a la siguiente iteración si hay un error
+            }
+
+            // Comparar el tiempo actual con el tiempo del registro y la programación
+            val timeDifference = (currentTime - recordTime) / (1000 * 60 * 60) // Diferencia en horas
+
+            // Lógica para determinar si se debe enviar un aviso
+            if (timeDifference >= dosageInterval) {
+                sendNotification(context, record) // función para enviar la notificación
+            }
+        }
+    }
+}
+
+
+// Función para enviar notificaciones
+    fun sendNotification(context: Context, record: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "medication_reminder"
+
+        // Crear un canal de notificación (solo necesario para API 26 y superior)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Medication Reminders", NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.logo) // Asegúrate de tener un icono
+            .setContentTitle("Recordatorio de Medicación")
+            .setContentText("Es hora de tomar: $record")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification.build()) // ID de notificación
+    }
 
 
 
