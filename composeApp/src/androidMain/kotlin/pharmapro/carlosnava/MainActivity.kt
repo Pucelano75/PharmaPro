@@ -27,9 +27,14 @@ class MainActivity : ComponentActivity() {
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                // Permiso concedido
+                // Permiso concedido: ejecutar acción, como mostrar una notificación
+                showNotification(this, "Permiso concedido", "Las notificaciones están habilitadas.")
             } else {
-                // Permiso denegado
+                showNotification(
+                    this,
+                    "Permiso denegado",
+                    "No podrás recibir notificaciones."
+                )
             }
         }
 
@@ -119,6 +124,8 @@ class MainActivity : ComponentActivity() {
             composable("home") { HomeScreen(navController) }
             composable("registerMedication") { RegisterMedicationScreen(navController) }
             composable("records") { RecordsScreen(navController) }
+            composable("programming") { ScheduleScreen(navController) }
+
         }
     }
 }

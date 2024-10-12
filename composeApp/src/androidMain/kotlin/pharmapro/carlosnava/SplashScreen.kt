@@ -84,7 +84,7 @@ fun SplashScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 100.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -99,12 +99,14 @@ fun SplashScreen(navController: NavController) {
 
             Text(
                 text = "Mejora tu bienestar día a día",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 18.sp,
                     fontStyle = FontStyle.Italic,
-                    color = Color.Gray
+                    color = Color.Gray,
+                ),
+                modifier = Modifier.padding(horizontal = 16.dp),
+
                 )
-            )
         }
 
         // Botón "Saltar"
