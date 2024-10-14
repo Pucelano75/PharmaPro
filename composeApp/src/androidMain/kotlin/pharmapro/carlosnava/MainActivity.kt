@@ -1,5 +1,6 @@
 package pharmapro.carlosnava
 
+import ScheduleScreen
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -76,22 +78,32 @@ class MainActivity : ComponentActivity() {
     // Crear canal de notificaciones
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "NFC Notification Channel"
-            val descriptionText = "Canal para notificaciones de NFC"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel("nfc_channel", name, importance).apply {
-                description = descriptionText
+            val nfcChannelName = "NFC Notification Channel"
+            val nfcDescriptionText = "Canal para notificaciones de NFC"
+            val nfcImportance = NotificationManager.IMPORTANCE_HIGH
+            val nfcChannel = NotificationChannel("nfc_channel", nfcChannelName, nfcImportance).apply {
+                description = nfcDescriptionText
+            }
+
+            // Canal para recordatorios de medicación
+            val medicationChannelName = "Medication Reminder Channel"
+            val medicationDescription = "Canal para recordatorios de medicación"
+            val medicationImportance = NotificationManager.IMPORTANCE_HIGH
+            val medicationChannel = NotificationChannel("medication_channel", medicationChannelName, medicationImportance).apply {
+                description = medicationDescription
             }
 
             val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(nfcChannel)
+            notificationManager.createNotificationChannel(medicationChannel)
         }
     }
 
+
     // Mostrar notificación
-    fun showNotification(context: Context, title: String, message: String) {
-        val builder = NotificationCompat.Builder(context, "nfc_channel")
+    fun showNotification(context: Context, title: String, message: String, channelId: String = "nfc_channel") {
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.logo) // Cambia esto al icono que desees
             .setContentTitle(title)
             .setContentText(message)
@@ -102,18 +114,19 @@ class MainActivity : ComponentActivity() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+            notificationManager.notify(1001, builder.build()) // nfc
+            notificationManager.notify(2001, builder.build()) // Medicación
+
+        }else {
+            // Aquí podrías informar al usuario que no se pueden mostrar notificaciones
+            Toast.makeText(
+                context,
+                "Permiso para mostrar notificaciones no concedido.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
-        notificationManager.notify(1001, builder.build())
     }
 
     @Composable

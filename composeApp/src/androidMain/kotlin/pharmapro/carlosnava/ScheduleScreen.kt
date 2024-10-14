@@ -1,5 +1,3 @@
-package pharmapro.carlosnava
-
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -26,6 +24,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import pharmapro.carlosnava.MedicationReminderReceiver
 import java.util.Calendar
 
 @Composable
@@ -35,6 +34,7 @@ fun ScheduleScreen(navController: NavController) {
     val (dias, setDias) = remember { mutableStateOf("") }
     val (horaInicio, setHoraInicio) = remember { mutableStateOf("") }
     val (retardoAviso, setRetardoAviso) = remember { mutableStateOf("") }
+    val (medicacionNombre, setMedicacionNombre) = remember { mutableStateOf("") }
 
     // Diseño de la pantalla
     Column(
@@ -52,6 +52,17 @@ fun ScheduleScreen(navController: NavController) {
                 fontSize = 24.sp
             ),
             modifier = Modifier.padding(bottom = 24.dp)
+        )
+
+        // Campo para ingresar el nombre de la medicación
+        OutlinedTextField(
+            value = medicacionNombre,
+            onValueChange = setMedicacionNombre,
+            label = { Text("Nombre de la Medicación") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
 
         // Campo para seleccionar la pauta (cada cuántas horas)
@@ -98,15 +109,30 @@ fun ScheduleScreen(navController: NavController) {
                 .padding(bottom = 32.dp)
         )
 
+        // Muestra los valores ingresados en pantalla
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Text(text = "Parámetros Introducidos:", style = MaterialTheme.typography.bodyLarge)
+
+            Text(text = "Pauta: ${pauta.ifEmpty { "No especificada" }} horas")
+            Text(text = "Días: ${dias.ifEmpty { "No especificado" }}")
+            Text(text = "Hora de Inicio: ${horaInicio.ifEmpty { "No especificada" }}")
+            Text(text = "Retardo de Aviso: ${retardoAviso.ifEmpty { "No especificado" }} minutos")
+        }
+
         // Botón para programar los recordatorios
         Button(
             onClick = {
-                if (pauta.isNotEmpty() && dias.isNotEmpty() && horaInicio.isNotEmpty() && retardoAviso.isNotEmpty()) {
+                if (pauta.isNotEmpty() && dias.isNotEmpty() && horaInicio.isNotEmpty() && retardoAviso.isNotEmpty() && medicacionNombre.isNotEmpty()) {
                     scheduleMedicationReminders(
                         pauta = pauta.toInt(),
                         dias = dias.toInt(),
                         horaInicio = horaInicio,
                         retardoAviso = retardoAviso.toInt(),
+                        medicacionNombre = medicacionNombre,
                         context = navController.context
                     )
                     Toast.makeText(navController.context, "Recordatorios programados", Toast.LENGTH_LONG).show()
@@ -121,23 +147,27 @@ fun ScheduleScreen(navController: NavController) {
     }
 }
 
-// Función para programar los recordatorios de medicación
 @SuppressLint("ScheduleExactAlarm")
 fun scheduleMedicationReminders(
     pauta: Int,  // Horas entre tomas
     dias: Int,   // Número de días
     horaInicio: String,  // Hora en formato "HH:mm"
     retardoAviso: Int,  // Tiempo de retardo en minutos
+    medicacionNombre: String,  // Nombre de la medicación
     context: Context
 ) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val notificationIntent = Intent(context, MedicationReminderReceiver::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(
-        context, 0, notificationIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
+    val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
 
-    // Obtener la hora actual y la hora de inicio
+    // Guardar los parámetros en SharedPreferences
+    editor.putString("medicationName_$medicacionNombre", medicacionNombre)
+    editor.putInt("dosageFrequency_$medicacionNombre", pauta)
+    editor.putInt("dosageDays_$medicacionNombre", dias)
+    editor.putString("startHour_$medicacionNombre", horaInicio)
+    editor.putInt("notificationDelay_$medicacionNombre", retardoAviso)
+    editor.apply()
+
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val (hours, minutes) = horaInicio.split(":").map { it.toInt() }
     val calendar = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, hours)
@@ -145,9 +175,21 @@ fun scheduleMedicationReminders(
         set(Calendar.SECOND, 0)
     }
 
-    // Programar las notificaciones
     for (i in 0 until dias) {
-        val triggerTime = calendar.timeInMillis + i * AlarmManager.INTERVAL_DAY + pauta * AlarmManager.INTERVAL_HOUR
+        val triggerTime = calendar.timeInMillis + i * AlarmManager.INTERVAL_DAY + pauta * AlarmManager.INTERVAL_HOUR + retardoAviso * 60 * 1000
+
+        // Crear un Intent para el BroadcastReceiver
+        val notificationIntent = Intent(context, MedicationReminderReceiver::class.java).apply {
+            putExtra("medicationName", medicacionNombre) // Se pasa el nombre de la medicación
+            putExtra("notificationId", i) // ID único para cada notificación
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, i, notificationIntent,  // Usa `i` como requestCode único
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Programar la alarma
         alarmManager.setExact(
             AlarmManager.RTC_WAKEUP,
             triggerTime,
@@ -155,3 +197,6 @@ fun scheduleMedicationReminders(
         )
     }
 }
+
+
+

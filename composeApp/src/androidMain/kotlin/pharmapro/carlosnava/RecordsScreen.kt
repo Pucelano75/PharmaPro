@@ -124,36 +124,35 @@ fun checkMedicationReminders(context: Context) {
     val medicationRecords = sharedPreferences.getString("medicationRecords", "")?.split("\n\n")
         ?.filter { it.isNotEmpty() } ?: emptyList()
 
-    // Recuperar parámetros de programación
-    val dosageFrequency = sharedPreferences.getInt("dosageFrequency", 1) // Frecuencia
-    val dosageInterval = sharedPreferences.getInt("dosageInterval", 0) // Intervalo en horas
-
-    // Obtener la fecha y hora actual
-    val currentTime = System.currentTimeMillis()
-
-    // Aquí puedes almacenar la lógica de comparación
+    // Para cada medicación en los registros, verificar su recordatorio
     for (record in medicationRecords) {
-        // Extraer la fecha y hora del registro
-        val recordTimeString = record.lines().find { it.startsWith("Fecha y Hora:") }
-            ?.removePrefix("Fecha y Hora: ")
-            ?.trim()
+        val medicationName = record.lines().find { it.startsWith("Medicamento:") }
+            ?.removePrefix("Medicamento: ")?.trim()
 
-        // Verificar que la cadena de fecha y hora no sea nula
-        if (recordTimeString != null) {
-            val recordTime = try {
-                java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(recordTimeString)?.time ?: 0
-            } catch (e: ParseException) {
-                // Manejar la excepción si no se puede analizar la fecha
-                e.printStackTrace()
-                continue // Saltar a la siguiente iteración si hay un error
-            }
+        if (medicationName != null) {
+            // Recuperar parámetros específicos para esta medicación
+            val dosageFrequency = sharedPreferences.getInt("dosageFrequency_$medicationName", 1)
+            val dosageDays = sharedPreferences.getInt("dosageDays_$medicationName", 0)
+            val notificationDelay = sharedPreferences.getInt("notificationDelay_$medicationName", 0)
 
-            // Comparar el tiempo actual con el tiempo del registro y la programación
-            val timeDifference = (currentTime - recordTime) / (1000 * 60 * 60) // Diferencia en horas
+            val recordTimeString = record.lines().find { it.startsWith("Fecha y Hora:") }
+                ?.removePrefix("Fecha y Hora: ")
+                ?.trim()
 
-            // Lógica para determinar si se debe enviar un aviso
-            if (timeDifference >= dosageInterval) {
-                sendNotification(context, record) // función para enviar la notificación
+            if (recordTimeString != null) {
+                val recordTime = try {
+                    java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(recordTimeString)?.time ?: 0
+                } catch (e: ParseException) {
+                    e.printStackTrace()
+                    continue
+                }
+
+                val currentTime = System.currentTimeMillis()
+                val timeDifference = (currentTime - recordTime) / (1000 * 60 * 60) // Diferencia en horas
+
+                if (timeDifference >= dosageFrequency) {
+                    sendNotification(context, medicationName) // función para enviar la notificación
+                }
             }
         }
     }
@@ -161,7 +160,7 @@ fun checkMedicationReminders(context: Context) {
 
 
 // Función para enviar notificaciones
-    fun sendNotification(context: Context, record: String) {
+    fun sendNotification(context: Context, medicacionNombre: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "medication_reminder"
 
@@ -174,7 +173,7 @@ fun checkMedicationReminders(context: Context) {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.logo) // Asegúrate de tener un icono
             .setContentTitle("Recordatorio de Medicación")
-            .setContentText("Es hora de tomar: $record")
+            .setContentText("Es hora de tomar: $medicacionNombre")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 

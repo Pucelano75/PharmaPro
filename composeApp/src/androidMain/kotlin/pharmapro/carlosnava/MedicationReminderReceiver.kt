@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 class MedicationReminderReceiver : BroadcastReceiver() {
     override fun onReceive(
         context: Context,
-        intent: Intent?
+        intent: Intent
     ) {
         // Crear la notificación
         val notification = NotificationCompat.Builder(context, "medication_channel")
