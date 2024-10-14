@@ -10,36 +10,28 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 class MedicationReminderReceiver : BroadcastReceiver() {
-    override fun onReceive(
-        context: Context,
-        intent: Intent
-    ) {
+    override fun onReceive(context: Context, intent: Intent) {
+        // Obtener el nombre del medicamento de los extras del intent
+        val medicationName = intent.getStringExtra("medicationName") ?: "Medicamento desconocido"
+
         // Crear la notificación
         val notification = NotificationCompat.Builder(context, "medication_channel")
-            .setSmallIcon(R.drawable.logo)
+            .setSmallIcon(R.drawable.logo) // Cambia esto por tu icono
             .setContentTitle("Recordatorio de medicación")
-            .setContentText("Es hora de tomar tu medicación.")
+            .setContentText("Es hora de tomar tu medicación: $medicationName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
 
         // Mostrar la notificación
-        with(NotificationManagerCompat.from(context)) {
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            notify(1, notification)
+        val notificationManager = NotificationManagerCompat.from(context)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // Si no se han concedido permisos, no se muestra la notificación
+            return
         }
+        notificationManager.notify(1, notification)
     }
 }
+
+
+

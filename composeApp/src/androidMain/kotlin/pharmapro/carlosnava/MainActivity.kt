@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
 
 
     // Mostrar notificación
-    fun showNotification(context: Context, title: String, message: String, channelId: String = "nfc_channel") {
+    private fun showNotification(context: Context, title: String, message: String, channelId: String = "medication_channel") {
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.logo) // Cambia esto al icono que desees
             .setContentTitle(title)
@@ -111,24 +111,12 @@ class MainActivity : ComponentActivity() {
             .setAutoCancel(true)
 
         val notificationManager = NotificationManagerCompat.from(context)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            notificationManager.notify(1001, builder.build()) // nfc
-            notificationManager.notify(2001, builder.build()) // Medicación
-
-        }else {
-            // Aquí podrías informar al usuario que no se pueden mostrar notificaciones
-            Toast.makeText(
-                context,
-                "Permiso para mostrar notificaciones no concedido.",
-                Toast.LENGTH_SHORT
-            ).show()
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(System.currentTimeMillis().toInt(), builder.build()) // Usar un ID único
+        } else {
+            Toast.makeText(context, "Permiso para mostrar notificaciones no concedido.", Toast.LENGTH_SHORT).show()
         }
     }
-
     @Composable
     fun Navigation() {
         val navController = rememberNavController()
