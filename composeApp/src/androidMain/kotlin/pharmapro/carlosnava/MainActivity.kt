@@ -1,6 +1,8 @@
 package pharmapro.carlosnava
 
-import ScheduleScreen
+
+import pharmapro.carlosnava.ScheduleScreen
+
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -24,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import pharmapro.carlosnava.ui.theme.PharmaProTheme
+
 
 class MainActivity : ComponentActivity() {
     private val requestNotificationPermissionLauncher =
@@ -130,8 +133,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
 
 
 

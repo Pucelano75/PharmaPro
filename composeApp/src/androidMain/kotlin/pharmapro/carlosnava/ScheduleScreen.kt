@@ -1,202 +1,216 @@
-import android.annotation.SuppressLint
+package pharmapro.carlosnava
+
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import pharmapro.carlosnava.MedicationReminderReceiver
 import java.util.Calendar
 
 @Composable
 fun ScheduleScreen(navController: NavController) {
-    // Estados para almacenar los valores de los campos
-    val (pauta, setPauta) = remember { mutableStateOf("") }
-    val (dias, setDias) = remember { mutableStateOf("") }
-    val (horaInicio, setHoraInicio) = remember { mutableStateOf("") }
-    val (retardoAviso, setRetardoAviso) = remember { mutableStateOf("") }
-    val (medicacionNombre, setMedicacionNombre) = remember { mutableStateOf("") }
+    // Variables para almacenar los detalles de la medicación
+    var medicationName by remember { mutableStateOf("") }
+    var pauta by remember { mutableStateOf<Int?>(null) }
+    var dias by remember { mutableStateOf<Int?>(null) }
+    var horaInicio by remember { mutableStateOf("08:00") }
+    var retardoAviso by remember { mutableStateOf<Int?>(null) }
 
-    // Diseño de la pantalla
+    val context = LocalContext.current // Obtener el contexto aquí
+
+    // Cargar datos guardados al iniciar la pantalla
+    LaunchedEffect(Unit) {
+        val medicationDetails = loadMedicationDetails(context)
+        medicationName = medicationDetails["medicacionNombre"] as String
+        pauta = medicationDetails["pauta"] as Int? ?: null
+        dias = medicationDetails["dias"] as Int? ?: null
+        horaInicio = medicationDetails["horaInicio"] as String
+        retardoAviso = medicationDetails["retardoAviso"] as Int? ?: null
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Programación de Medicación",
-            style = MaterialTheme.typography.titleLarge.copy(
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 24.sp
-            ),
-            modifier = Modifier.padding(bottom = 24.dp)
+        // Título de la pantalla
+        Text("Programación de Recordatorios", style = MaterialTheme.typography.titleLarge)
+
+        TextField(
+            value = medicationName,
+            onValueChange = { medicationName = it },
+            label = { Text("Nombre de la medicación") },
+            placeholder = { Text("Introduce el nombre de la medicación") },
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo para ingresar el nombre de la medicación
-        OutlinedTextField(
-            value = medicacionNombre,
-            onValueChange = setMedicacionNombre,
-            label = { Text("Nombre de la Medicación") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = pauta?.toString() ?: "",
+            onValueChange = { pauta = it.toIntOrNull() },
+            label = { Text("Pauta") },
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo para seleccionar la pauta (cada cuántas horas)
-        OutlinedTextField(
-            value = pauta,
-            onValueChange = setPauta,
-            label = { Text("Pauta (horas)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo para ingresar el número de días
-        OutlinedTextField(
-            value = dias,
-            onValueChange = setDias,
+        TextField(
+            value = dias?.toString() ?: "",
+            onValueChange = { dias = it.toIntOrNull() },
             label = { Text("Días") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo para ingresar la hora de inicio (formato HH:mm)
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
             value = horaInicio,
-            onValueChange = setHoraInicio,
-            label = { Text("Hora de Inicio (HH:mm)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            onValueChange = { horaInicio = it },
+            label = { Text("Hora de inicio (HH:MM)") },
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo para ingresar el retardo de aviso (minutos)
-        OutlinedTextField(
-            value = retardoAviso,
-            onValueChange = setRetardoAviso,
-            label = { Text("Retardo de Aviso (minutos)") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = retardoAviso?.toString() ?: "",
+            onValueChange = { retardoAviso = it.toIntOrNull() },
+            label = { Text("Retardo de aviso (minutos)") },
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Muestra los valores ingresados en pantalla
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
-            Text(text = "Parámetros Introducidos:", style = MaterialTheme.typography.bodyLarge)
+        Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Pauta: ${pauta.ifEmpty { "No especificada" }} horas")
-            Text(text = "Días: ${dias.ifEmpty { "No especificado" }}")
-            Text(text = "Hora de Inicio: ${horaInicio.ifEmpty { "No especificada" }}")
-            Text(text = "Retardo de Aviso: ${retardoAviso.ifEmpty { "No especificado" }} minutos")
-        }
-
-        // Botón para programar los recordatorios
         Button(
             onClick = {
-                if (pauta.isNotEmpty() && dias.isNotEmpty() && horaInicio.isNotEmpty() && retardoAviso.isNotEmpty() && medicacionNombre.isNotEmpty()) {
-                    scheduleMedicationReminders(
-                        pauta = pauta.toInt(),
-                        dias = dias.toInt(),
-                        horaInicio = horaInicio,
-                        retardoAviso = retardoAviso.toInt(),
-                        medicacionNombre = medicacionNombre,
-                        context = navController.context
-                    )
-                    Toast.makeText(navController.context, "Recordatorios programados", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(navController.context, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
-                }
+                // Guardar los detalles de la medicación
+                saveMedicationDetails(
+                    context = context,
+                    medicacionNombre = medicationName,
+                    pauta = pauta ?: 1,
+                    dias = dias ?: 1,
+                    horaInicio = horaInicio,
+                    retardoAviso = retardoAviso ?: 0
+                )
+
+                // Programar los recordatorios
+                scheduleMedicationReminders(
+                    pauta = pauta ?: 1,
+                    dias = dias ?: 1,
+                    horaInicio = horaInicio,
+                    retardoAviso = retardoAviso ?: 0,
+                    medicacionNombre = medicationName,
+                    context = context
+                )
+
+                // Navegar a otra pantalla si es necesario
+                navController.navigate("records")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Programar")
+            Text("Guardar")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
-@SuppressLint("ScheduleExactAlarm")
+// Funciones para guardar y cargar datos de SharedPreferences
+fun saveMedicationDetails(context: Context, medicacionNombre: String, pauta: Int, dias: Int, horaInicio: String, retardoAviso: Int) {
+    val sharedPreferences = context.getSharedPreferences("medication_preferences", Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        putString("medicacionNombre", medicacionNombre)
+        putInt("pauta", pauta)
+        putInt("dias", dias)
+        putString("horaInicio", horaInicio)
+        putInt("retardoAviso", retardoAviso)
+        apply()
+    }
+}
+
+fun loadMedicationDetails(context: Context): Map<String, Any> {
+    val sharedPreferences = context.getSharedPreferences("medication_preferences", Context.MODE_PRIVATE)
+    return mapOf(
+        "medicacionNombre" to (sharedPreferences.getString("medicacionNombre", "") ?: ""),
+        "pauta" to sharedPreferences.getInt("pauta", 0),
+        "dias" to sharedPreferences.getInt("dias", 0),
+        "horaInicio" to (sharedPreferences.getString("horaInicio", "") ?: ""),
+        "retardoAviso" to sharedPreferences.getInt("retardoAviso", 0)
+    )
+}
+
+// Función para programar recordatorios de medicación
 fun scheduleMedicationReminders(
-    pauta: Int,  // Horas entre tomas
-    dias: Int,   // Número de días
-    horaInicio: String,  // Hora en formato "HH:mm"
-    retardoAviso: Int,  // Tiempo de retardo en minutos
-    medicacionNombre: String,  // Nombre de la medicación
+    pauta: Int,
+    dias: Int,
+    horaInicio: String,
+    retardoAviso: Int,
+    medicacionNombre: String,
     context: Context
 ) {
-    val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
-    val editor = sharedPreferences.edit()
-
-    // Guardar los parámetros en SharedPreferences
-    editor.putString("medicationName_$medicacionNombre", medicacionNombre)
-    editor.putInt("dosageFrequency_$medicacionNombre", pauta)
-    editor.putInt("dosageDays_$medicacionNombre", dias)
-    editor.putString("startHour_$medicacionNombre", horaInicio)
-    editor.putInt("notificationDelay_$medicacionNombre", retardoAviso)
-    editor.apply()
-
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val (hours, minutes) = horaInicio.split(":").map { it.toInt() }
-    val calendar = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, hours)
-        set(Calendar.MINUTE, minutes)
-        set(Calendar.SECOND, 0)
+    val intent = Intent(context, MedicationReminderReceiver::class.java).apply {
+        putExtra("medicationName", medicacionNombre)
     }
 
-    for (i in 0 until dias) {
-        val triggerTime = calendar.timeInMillis + i * AlarmManager.INTERVAL_DAY + pauta * AlarmManager.INTERVAL_HOUR + retardoAviso * 60 * 1000
+    val calendar = Calendar.getInstance()
+    val (hour, minute) = horaInicio.split(":").map { it.toInt() }
+    calendar.set(Calendar.HOUR_OF_DAY, hour)
+    calendar.set(Calendar.MINUTE, minute)
+    calendar.set(Calendar.SECOND, 0)
 
-        // Crear un Intent para el BroadcastReceiver
-        val notificationIntent = Intent(context, MedicationReminderReceiver::class.java).apply {
-            putExtra("medicationName", medicacionNombre) // Se pasa el nombre de la medicación
-            putExtra("notificationId", i) // ID único para cada notificación
-        }
-
+    for (day in 0 until dias) {
+        calendar.add(Calendar.DAY_OF_YEAR, day * pauta)
         val pendingIntent = PendingIntent.getBroadcast(
-            context, i, notificationIntent,  // Usa `i` como requestCode único
+            context,
+            day,
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-
-        // Programar la alarma
-        alarmManager.setExact(
+        alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
-            triggerTime,
+            calendar.timeInMillis - (retardoAviso * 60 * 1000), // Restar el retardo
+            AlarmManager.INTERVAL_DAY * pauta,
             pendingIntent
         )
+        calendar.add(Calendar.DAY_OF_YEAR, -day * pauta) // Resetear el día para la próxima iteración
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

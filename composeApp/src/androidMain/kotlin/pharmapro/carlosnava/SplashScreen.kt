@@ -98,7 +98,7 @@ fun SplashScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Mejora tu bienestar día a día",
+                text = "Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z ",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 18.sp,
                     fontStyle = FontStyle.Italic,
