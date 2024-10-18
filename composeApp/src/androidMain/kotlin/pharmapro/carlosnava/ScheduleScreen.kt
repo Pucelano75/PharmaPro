@@ -2,9 +2,11 @@ package pharmapro.carlosnava
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +51,19 @@ fun ScheduleScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Estado para manejar el TimePicker
+    val calendar = Calendar.getInstance()
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _: TimePicker, hour: Int, minute: Int ->
+            // Actualizar la hora cuando se selecciona
+            horaInicio = String.format("%02d:%02d", hour, minute)
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true
+    )
 
     // Cargar datos guardados al iniciar la pantalla
     LaunchedEffect(Unit) {
@@ -113,13 +128,13 @@ fun ScheduleScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de hora de inicio
-        TextField(
-            value = horaInicio,
-            onValueChange = { horaInicio = it },
-            label = { Text("Hora de inicio (HH:MM)") },
+        // Botón para seleccionar la hora de inicio con el TimePicker
+        Button(
+            onClick = { timePickerDialog.show() },
             modifier = Modifier.fillMaxWidth()
-        )
+        ) {
+            Text(text = "Seleccionar hora de inicio: $horaInicio")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
