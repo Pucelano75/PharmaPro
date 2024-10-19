@@ -1,6 +1,8 @@
 package pharmapro.carlosnava
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,9 +14,12 @@ import androidx.core.app.NotificationManagerCompat
 
 class MedicationReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val medicationName = intent.getStringExtra("medicationName") ?: "Medicamento desconocido"
+        val medicationName = intent.getStringExtra("medicationName") ?: return  // Retornar si no hay nombre
 
-        // Intent para abrir la MainActivity (o cualquier otra actividad que desees)
+        // Crear un canal de notificación si es necesario
+        createNotificationChannel(context)
+
+        // Intent para abrir la MainActivity
         val notificationIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -28,7 +33,7 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, "medication_channel")
-            .setSmallIcon(R.drawable.logo) // Icono de la notificación
+            .setSmallIcon(R.drawable.logo) // Asegúrate de que este icono sea adecuado
             .setContentTitle("Recordatorio de medicación")
             .setContentText("Es hora de tomar tu medicación: $medicationName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -38,10 +43,27 @@ class MedicationReminderReceiver : BroadcastReceiver() {
 
         val notificationManager = NotificationManagerCompat.from(context)
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(System.currentTimeMillis().toInt(), notification) // Usar un ID único
+            notificationManager.notify(medicationName.hashCode(), notification) // Usar un ID único basado en el nombre del medicamento
+        }
+    }
+
+    private fun createNotificationChannel(context: Context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channelId = "medication_channel"
+            val channelName = "Recordatorios de Medicación"
+            val channelDescription = "Canal para recordatorios de medicación"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+
+            val channel = NotificationChannel(channelId, channelName, importance).apply {
+                description = channelDescription
+            }
+
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 }
+
 
 
 
