@@ -48,6 +48,7 @@ kotlin {
                 implementation("io.coil-kt:coil-compose:2.4.0") // Cargar imagen del logo en Android
                 implementation("androidx.navigation:navigation-compose:2.5.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+                implementation("com.google.code.gson:gson:2.8.9")
             }
         }
 
@@ -105,6 +106,9 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
     }
+}
+dependencies {
+    implementation(libs.firebase.crashlytics.buildtools)
 }
 
 
