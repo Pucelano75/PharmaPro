@@ -266,14 +266,19 @@ fun programarAlarmas(context: Context, reminder: MedicationReminder) {
             val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, day)
 
+            // Parsear la hora de inicio correctamente
             val (startHour, startMinute) = reminder.horaInicio.split(":").map { it.toInt() }
             calendar.set(Calendar.HOUR_OF_DAY, startHour)
             calendar.set(Calendar.MINUTE, startMinute)
 
-            calendar.add(Calendar.MINUTE, reminder.retardoAviso + i * (24 / reminder.pauta))
+            // Ajustar la hora de cada toma según la pauta
+            val intervaloHoras = 24 / reminder.pauta  // Dividir las 24 horas por la pauta
+            calendar.add(Calendar.HOUR_OF_DAY, i * intervaloHoras)
 
+            // Crear el intent para la alarma
             val intent = Intent(context, MedicationReminderReceiver::class.java).apply {
                 putExtra("medicationName", reminder.medicacionNombre)
+                putExtra("alarmId", reminder.hashCode() + day * 100 + i)  // Identificador único
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
@@ -291,12 +296,11 @@ fun programarAlarmas(context: Context, reminder: MedicationReminder) {
                 )
             } catch (e: SecurityException) {
                 Toast.makeText(context, "No se pudo programar una alarma exacta. Revisa los permisos.", Toast.LENGTH_LONG).show()
-                // Redirigir a la configuración si falla
-                redirigirAPermisosExactos(context)
             }
         }
     }
 }
+
 
 // Función para redirigir a la configuración de permisos de alarmas exactas (Solo para Android 12+)
 fun redirigirAPermisosExactos(context: Context) {
