@@ -118,6 +118,20 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState, scope:
             Text(text = "Registros", fontSize = 18.sp, color = Color.White)
         }
 
+        // **Nuevo botón para Informe**
+        Button(
+            onClick = {
+                navController.navigate("send_report")
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.width(buttonWidth).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+        ) {
+            Text(text = "Informe", fontSize = 18.sp, color = Color.White)
+        }
+
+
         // Botón para cerrar el menú
         Button(
             onClick = {

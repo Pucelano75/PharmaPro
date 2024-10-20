@@ -1,8 +1,7 @@
 package pharmapro.carlosnava
 
 
-import pharmapro.carlosnava.ScheduleScreen
-
+import SendReportScreen
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -129,6 +128,8 @@ class MainActivity : ComponentActivity() {
             composable("registerMedication") { RegisterMedicationScreen(navController) }
             composable("records") { RecordsScreen(navController) }
             composable("programming") { ScheduleScreen(navController) }
+            composable("send_report") { SendReportScreen(navController) }
+
 
         }
     }

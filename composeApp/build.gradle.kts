@@ -36,6 +36,9 @@ kotlin {
                 implementation(compose.material) // Material 2 para compatibilidad
                 implementation(compose.components.resources)
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.itext7.core)
+
+
             }
         }
 
@@ -49,6 +52,8 @@ kotlin {
                 implementation("androidx.navigation:navigation-compose:2.5.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
                 implementation("com.google.code.gson:gson:2.8.9")
+                implementation("com.itextpdf:itext7-core:7.2.2")
+                implementation("com.itextpdf:kernel:7.2.2")
             }
         }
 
@@ -109,6 +114,7 @@ android {
 }
 dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.work.runtime.ktx)
 }
 
 
