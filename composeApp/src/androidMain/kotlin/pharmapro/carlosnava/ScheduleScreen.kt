@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,8 +76,14 @@ fun ScheduleScreen(navController: NavController) {
 
     // Función para eliminar recordatorio
     fun removeReminder(reminder: MedicationReminder) {
+        // Primero, cancelar las alarmas programadas
+        cancelarAlarmas(context, reminder)
+
+        // Luego, eliminar el recordatorio de la lista
         medicationReminders = medicationReminders.filter { it != reminder }.toMutableList()
-        saveMedicationReminders(context, medicationReminders) // Guardar cambios en SharedPreferences
+
+        // Guardar cambios en SharedPreferences
+        saveMedicationReminders(context, medicationReminders)
     }
 
     Column(
@@ -112,7 +117,7 @@ fun ScheduleScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
-            value = pauta.toString(),
+            value = pauta,
             onValueChange = { pauta = it },
             label = { Text("Pauta") },
             placeholder = { Text("Cantidad de veces al día") },
@@ -122,7 +127,7 @@ fun ScheduleScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
-            value = dias.toString(),
+            value = dias,
             onValueChange = { dias = it },
             label = { Text("Días") },
             placeholder = { Text("Número de días") },
@@ -142,7 +147,7 @@ fun ScheduleScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
-            value = retardoAviso.toString(),
+            value = retardoAviso,
             onValueChange = { retardoAviso = it },
             label = { Text("Retardo de aviso (minutos)") },
             placeholder = { Text("Ej. 10 minutos de retardo") },
@@ -240,6 +245,28 @@ fun loadMedicationReminders(context: Context): List<MedicationReminder> {
     }
 }
 
+// Función para cancelar todas las alarmas asociadas a un recordatorio
+fun cancelarAlarmas(context: Context, reminder: MedicationReminder) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    for (day in 0 until reminder.dias) {
+        for (i in 0 until reminder.pauta) {
+            val intent = Intent(context, MedicationReminderReceiver::class.java)
+
+            // Usar el mismo identificador único que al programar las alarmas
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                reminder.hashCode() + day * 100 + i,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            // Cancelar la alarma
+            alarmManager.cancel(pendingIntent)
+        }
+    }
+}
+
 fun programarRecordatorioCompleto(context: Context, reminder: MedicationReminder) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -247,39 +274,35 @@ fun programarRecordatorioCompleto(context: Context, reminder: MedicationReminder
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         // Para Android 12 (API 31) y superiores
         if (alarmManager.canScheduleExactAlarms()) {
-            programarAlarmas(context, reminder)
+            programarAlarmas(context, alarmManager, reminder)
         } else {
-            // Informar al usuario que necesita activar el permiso
-            redirigirAPermisosExactos(context)
+            // Si no se pueden programar alarmas exactas, redirigir al usuario
+            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            context.startActivity(intent)
         }
     } else {
-        // Para Android 11 (API 30) y versiones inferiores, no es necesario este permiso
-        programarAlarmas(context, reminder)
+        // Para versiones anteriores a Android 12
+        programarAlarmas(context, alarmManager, reminder)
     }
 }
 
-fun programarAlarmas(context: Context, reminder: MedicationReminder) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: MedicationReminder) {
+    val calendar = Calendar.getInstance()
+    val (hora, minuto) = reminder.horaInicio.split(":").map { it.toInt() }
+
+    // Establecer la hora de inicio de la primera alarma
+    calendar.set(Calendar.HOUR_OF_DAY, hora)
+    calendar.set(Calendar.MINUTE, minuto)
+    calendar.set(Calendar.SECOND, 0)
 
     for (day in 0 until reminder.dias) {
+        // Calcular el tiempo para el día actual
+        calendar.add(Calendar.DAY_OF_MONTH, day)
+
+        // Programar una alarma para cada intervalo basado en la pauta
         for (i in 0 until reminder.pauta) {
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, day)
-
-            // Parsear la hora de inicio correctamente
-            val (startHour, startMinute) = reminder.horaInicio.split(":").map { it.toInt() }
-            calendar.set(Calendar.HOUR_OF_DAY, startHour)
-            calendar.set(Calendar.MINUTE, startMinute)
-
-            // Ajustar la hora de cada toma según la pauta
-            val intervaloHoras = 24 / reminder.pauta  // Dividir las 24 horas por la pauta
-            calendar.add(Calendar.HOUR_OF_DAY, i * intervaloHoras)
-
-            // Crear el intent para la alarma
-            val intent = Intent(context, MedicationReminderReceiver::class.java).apply {
-                putExtra("medicationName", reminder.medicacionNombre)
-                putExtra("alarmId", reminder.hashCode() + day * 100 + i)  // Identificador único
-            }
+            val intent = Intent(context, MedicationReminderReceiver::class.java)
+            intent.putExtra("medicationName", reminder.medicacionNombre)
 
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
@@ -288,27 +311,23 @@ fun programarAlarmas(context: Context, reminder: MedicationReminder) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            try {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            } catch (e: SecurityException) {
-                Toast.makeText(context, "No se pudo programar una alarma exacta. Revisa los permisos.", Toast.LENGTH_LONG).show()
-            }
+            // Programar la alarma
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+
+            // Incrementar el tiempo para la siguiente alarma basándose en la pauta
+            calendar.add(Calendar.MINUTE, (24 * 60) / reminder.pauta)
         }
+
+        // Volver a la hora original para el siguiente día
+        calendar.set(Calendar.HOUR_OF_DAY, hora)
+        calendar.set(Calendar.MINUTE, minuto)
     }
 }
 
-
-// Función para redirigir a la configuración de permisos de alarmas exactas (Solo para Android 12+)
-fun redirigirAPermisosExactos(context: Context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-        context.startActivity(intent)
-    }
-}
 
 
 

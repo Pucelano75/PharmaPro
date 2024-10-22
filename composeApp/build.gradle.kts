@@ -54,6 +54,7 @@ kotlin {
                 implementation("com.google.code.gson:gson:2.8.9")
                 implementation("com.itextpdf:itext7-core:7.2.2")
                 implementation("com.itextpdf:kernel:7.2.2")
+
             }
         }
 

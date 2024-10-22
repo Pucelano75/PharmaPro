@@ -52,7 +52,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".MedicationReminderReceiver" />
+
+        <receiver
+            android:name=".MedicationReminderReceiver"
+            android:exported="true"
+            android:enabled="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
