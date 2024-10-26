@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +48,7 @@ fun RecordsScreen(navController: NavController) {
     ) {
         Text(
             text = "Registros de Medicación",
-            style = MaterialTheme.typography.headlineMedium, // headlineMedium en lugar de h5
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
 
@@ -61,28 +61,32 @@ fun RecordsScreen(navController: NavController) {
             itemsIndexed(medicationRecords.value) { index, record ->
                 val isSelected = selectedRecords.value.contains(index)
 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(8.dp)
                 ) {
-                    Checkbox(
-                        checked = isSelected,
-                        onCheckedChange = { isChecked ->
-                            val updatedSelected = selectedRecords.value.toMutableSet()
-                            if (isChecked) {
-                                updatedSelected.add(index)
-                            } else {
-                                updatedSelected.remove(index)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = { isChecked ->
+                                val updatedSelected = selectedRecords.value.toMutableSet()
+                                if (isChecked) {
+                                    updatedSelected.add(index)
+                                } else {
+                                    updatedSelected.remove(index)
+                                }
+                                selectedRecords.value = updatedSelected
                             }
-                            selectedRecords.value = updatedSelected
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = record, modifier = Modifier.weight(1f))
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = record, modifier = Modifier.weight(1f))
+                    }
+                    // Línea separadora entre registros
+                    Divider(color = Color.Gray, thickness = 1.dp)
                 }
-                Divider(color = Color.Gray, thickness = 1.dp) // Línea separadora entre registros
             }
         }
 
@@ -109,6 +113,7 @@ fun RecordsScreen(navController: NavController) {
         }
     }
 }
+
 
 
 
