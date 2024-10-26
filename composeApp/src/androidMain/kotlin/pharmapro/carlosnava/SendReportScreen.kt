@@ -45,7 +45,6 @@ fun SendReportScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Título en negrita con estilo moderno
         Text(
             text = "Envio de registros",
             style = MaterialTheme.typography.titleLarge,
@@ -55,7 +54,6 @@ fun SendReportScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Imagen decorativa de formulario desde drawable
         Image(
             painter = painterResource(id = R.drawable.formulario_diario),
             contentDescription = null,
@@ -66,7 +64,6 @@ fun SendReportScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón moderno con color gris claro
         ElevatedButton(
             onClick = {
                 val pdfFile = generatePdf(context) // Genera el PDF
@@ -84,12 +81,18 @@ fun SendReportScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
         ) {
-            Text("Preparar y enviar Informe", style = MaterialTheme.typography.bodyLarge)
+            Text("Generar Informe", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
 
 private fun generatePdf(context: Context): File? {
+    val sharedPreferences = context.getSharedPreferences("PharmaPro", Context.MODE_PRIVATE)
+
+    val medicationRecords = sharedPreferences.getString("medicationRecords", "")
+        ?.split("\n\n")
+        ?.filter { it.isNotEmpty() } ?: emptyList()
+
     val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
     val file = File(dir, "informe_medicacion.pdf")
 
@@ -99,14 +102,23 @@ private fun generatePdf(context: Context): File? {
 
     // Contenido del PDF
     val canvas = page.canvas
-    val paint = android.graphics.Paint()
-    paint.textSize = 16f
-    paint.isAntiAlias = true
-    canvas.drawText("Informe de Medicación", 80f, 50f, paint)
+    val paint = android.graphics.Paint().apply {
+        textSize = 16f
+        isAntiAlias = true
+    }
 
-    // Datos de ejemplo de RecordsScreen
-    val reportContent = "Fecha: 2024-10-26\nMedicamento: Paracetamol\nDosis: 500 mg"
-    canvas.drawText(reportContent, 80f, 100f, paint)
+    canvas.drawText("Informe de Tomas:", 80f, 50f, paint)
+
+    // Agregar los registros al PDF con ajuste de línea
+    var yPosition = 100f
+    medicationRecords.forEach { record ->
+        val lines = wrapText(record, paint, 500f) // Ajustar según el ancho del PDF
+        for (line in lines) {
+            canvas.drawText(line, 80f, yPosition, paint)
+            yPosition += 20f // Espacio entre líneas
+        }
+        yPosition += 10f // Espacio adicional entre registros
+    }
 
     pdfDocument.finishPage(page)
 
@@ -123,6 +135,30 @@ private fun generatePdf(context: Context): File? {
     }
 }
 
+// Función para ajustar el texto
+private fun wrapText(text: String, paint: android.graphics.Paint, maxWidth: Float): List<String> {
+    val words = text.split(" ")
+    val lines = mutableListOf<String>()
+    var currentLine = ""
+
+    for (word in words) {
+        val testLine = "$currentLine $word".trim()
+        if (paint.measureText(testLine) > maxWidth) {
+            if (currentLine.isNotEmpty()) {
+                lines.add(currentLine) // Añadir línea anterior a la lista
+            }
+            currentLine = word // Comenzar nueva línea
+        } else {
+            currentLine = testLine // Añadir palabra a la línea actual
+        }
+    }
+    if (currentLine.isNotEmpty()) {
+        lines.add(currentLine) // Añadir última línea
+    }
+
+    return lines
+}
+
 private fun openShareIntent(context: Context, file: File) {
     val uri: Uri = FileProvider.getUriForFile(
         context,
@@ -130,19 +166,18 @@ private fun openShareIntent(context: Context, file: File) {
         file
     )
 
-    // Crear el intent para compartir el archivo
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
         type = "application/pdf"
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    // Iniciar la actividad de compartir
     if (shareIntent.resolveActivity(context.packageManager) != null) {
         context.startActivity(Intent.createChooser(shareIntent, "Compartir informe"))
     } else {
         Toast.makeText(context, "No hay aplicaciones disponibles para compartir el informe.", Toast.LENGTH_SHORT).show()
     }
 }
+
 
 
