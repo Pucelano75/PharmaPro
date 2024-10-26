@@ -1,6 +1,7 @@
 package pharmapro.carlosnava
 
-
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOutBounce
 import androidx.compose.animation.core.tween
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +30,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(navController: NavController) {
     val scale = remember { Animatable(0.5f) }
+    val context = LocalContext.current // Aquí se obtiene el contexto
 
     LaunchedEffect(Unit) {
         scale.animateTo(
@@ -98,16 +103,24 @@ fun SplashScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z ",
+            // Enlace seleccionable
+            ClickableText(
+                text = AnnotatedString("Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z"),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 18.sp,
                     fontStyle = FontStyle.Italic,
-                    color = Color.Gray,
+                    color = Color.Blue
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp),
-
-                )
+                onClick = { offset ->
+                    // Aquí se detecta el enlace y se abre el navegador
+                    val text = "Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z"
+                    if (offset in text.indices) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://n9.cl/mjb0z"))
+                        context.startActivity(intent)
+                    }
+                }
+            )
         }
 
         // Botón "Saltar"
@@ -126,8 +139,6 @@ fun SplashScreen(navController: NavController) {
                     }
                 }
         )
-
     }
 }
-
 
