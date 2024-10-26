@@ -6,12 +6,11 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import pharmapro.carlosnava.R
 
 object NotificationUtils {
     fun showNotification(context: Context, title: String, message: String) {
         val builder = NotificationCompat.Builder(context, "nfc_channel")
-            .setSmallIcon(R.drawable.logo) // Cambia esto al icono que desees
+            .setSmallIcon(R.drawable.logotipo) // Cambia esto al icono que desees
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

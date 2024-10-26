@@ -34,7 +34,7 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Recordatorio de Medicación")
             .setContentText("Es hora de tomar tu $medicationName")
-            .setSmallIcon(R.drawable.logo) // Reemplaza con tu icono
+            .setSmallIcon(R.drawable.logotipo) // Reemplaza con tu icono
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()

@@ -3,7 +3,6 @@ package pharmapro.carlosnava
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -26,7 +25,7 @@ class NfcForegroundService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Servicio NFC")
             .setContentText("Escuchando etiquetas NFC...")
-            .setSmallIcon(R.drawable.logo) // Cambia esto al icono que desees
+            .setSmallIcon(R.drawable.logotipo) // Cambia esto al icono que desees
             .build()
 
         // Iniciar el servicio en primer plano

@@ -54,6 +54,9 @@ kotlin {
                 implementation("com.google.code.gson:gson:2.8.9")
                 implementation("com.itextpdf:itext7-core:7.2.2")
                 implementation("com.itextpdf:kernel:7.2.2")
+                implementation ("com.sun.mail:android-activation:1.6.2")
+
+                implementation ("com.sun.mail:android-mail:1.6.2")
 
             }
         }
@@ -116,6 +119,7 @@ android {
 dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.benchmark.macro)
 }
 
 

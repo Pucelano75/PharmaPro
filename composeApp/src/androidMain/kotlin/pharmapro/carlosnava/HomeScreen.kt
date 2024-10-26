@@ -279,7 +279,7 @@ fun HomeScreen(navController: NavController) {
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 4.dp) ){
                             Image(
-                                painter = painterResource(id = pharmapro.carlosnava.R.drawable.logo),
+                                painter = painterResource(id = R.drawable.logotipo),
                                 contentDescription = "Logo de PharmaPro",
                                 modifier = Modifier.size(50.dp) // Tamaño más pequeño para el logo
                                     .scale(animatedScale) // Aplica la escala animada aquí

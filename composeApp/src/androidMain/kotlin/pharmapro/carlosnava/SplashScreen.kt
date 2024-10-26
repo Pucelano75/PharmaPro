@@ -1,5 +1,6 @@
 package pharmapro.carlosnava
 
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOutBounce
 import androidx.compose.animation.core.tween
@@ -44,7 +45,7 @@ fun SplashScreen(navController: NavController) {
             targetValue = 1f,
             animationSpec = tween(durationMillis = 1000, easing = EaseOutBounce)
         )
-        delay(10000)
+        delay(5000)
         navController.navigate("home") {
             popUpTo("splash") { inclusive = true }
         }
@@ -62,7 +63,7 @@ fun SplashScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = pharmapro.carlosnava.R.drawable.logotipo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(60.dp)

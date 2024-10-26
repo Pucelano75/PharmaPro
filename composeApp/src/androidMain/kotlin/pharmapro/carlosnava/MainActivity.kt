@@ -3,7 +3,6 @@ package pharmapro.carlosnava
 
 
 
-import SendReportScreen
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -108,7 +107,7 @@ class MainActivity : ComponentActivity() {
     // Mostrar notificación
     private fun showNotification(context: Context, title: String, message: String, channelId: String = "medication_channel") {
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.logo) // Cambia esto al icono que desees
+            .setSmallIcon(R.drawable.logotipo) // Cambia esto al icono que desees
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
