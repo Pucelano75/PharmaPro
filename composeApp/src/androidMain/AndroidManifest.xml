@@ -18,12 +18,23 @@
 
 
     <application
+        android:name=".PharmaProApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+        <!-- AdMob initialization -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/> <!-- Reemplaza con tu ID de aplicación -->
+
+        <!-- Banner ad unit ID for testing -->
+        <meta-data
+            android:name="com.google.android.gms.ads.BANNER_AD_UNIT_ID"
+            android:value="ca-app-pub-3940256099942544/6300978111"/> <!-- ID de banner de prueba -->
 
         <!-- MainActivity -->
         <activity

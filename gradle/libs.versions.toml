@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.1"
+agp = "8.6.0"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
@@ -20,6 +20,8 @@ kotlinxCoroutinesCore = "1.8.1"
 firebaseCrashlyticsBuildtools = "3.0.2"
 workRuntimeKtx = "2.9.1"
 benchmarkMacro = "1.3.3"
+adsMobileSdk = "0.9.0-alpha01"
+playServicesAdsLite = "23.5.0"
 
 [libraries]
 itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7Core" }
@@ -40,6 +42,8 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro", version.ref = "benchmarkMacro" }
+ads-mobile-sdk = { group = "com.google.android.libraries.ads.mobile.sdk", name = "ads-mobile-sdk", version.ref = "adsMobileSdk" }
+play-services-ads-lite = { group = "com.google.android.gms", name = "play-services-ads-lite", version.ref = "playServicesAdsLite" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -38,12 +38,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
+import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
     val scale = remember { Animatable(0.5f) }
     val context = LocalContext.current // Aquí se obtiene el contexto
+
+    // Inicializa Mobile Ads
+    LaunchedEffect(Unit) {
+        MobileAds.initialize(context) {}
+    }
+
+    // Crea un AdView para el banner
+    val adView = remember { AdView(context).apply {
+        adUnitId = "ca-app-pub-3940256099942544/6300978111" // Reemplaza con tu ID de anuncio
+        setAdSize(AdSize.BANNER)
+    }}
+
+    // Cargar el anuncio
+    val adRequest = AdRequest.Builder().build()
+    adView.loadAd(adRequest)
 
     LaunchedEffect(Unit) {
         scale.animateTo(
@@ -61,31 +81,6 @@ fun SplashScreen(navController: NavController) {
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Color.LightGray, Color.White)))
     ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = pharmapro.carlosnava.R.drawable.logotipo),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(60.dp)
-                    .scale(scale.value),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Bienvenido a PharmaPro",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 30.sp,
-                    color = Color.DarkGray,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,6 +88,30 @@ fun SplashScreen(navController: NavController) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
+            Row(
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = pharmapro.carlosnava.R.drawable.logotipo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .scale(scale.value),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Bienvenido a PharmaPro",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 30.sp,
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
@@ -101,44 +120,30 @@ fun SplashScreen(navController: NavController) {
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Añadir el banner de AdMob justo debajo del texto
+            Spacer(modifier = Modifier.height(16.dp)) // Espaciado entre el texto y el anuncio
+            AndroidView(factory = { adView })
 
-            // Enlace seleccionable
-            ClickableText(
-                text = AnnotatedString("Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z"),
+            // Espacio flexible para empujar el botón hacia abajo
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Botón "Saltar"
+            Text(
+                text = "Saltar",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 18.sp,
-                    fontStyle = FontStyle.Italic,
-                    color = Color.Blue
+                    color = Color.Blue,
+                    fontSize = 18.sp
                 ),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = { offset ->
-                    // Aquí se detecta el enlace y se abre el navegador
-                    val text = "Recuerda comprar tus pegatinas NFC en el siguiente enlace: https://n9.cl/mjb0z"
-                    if (offset in text.indices) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://n9.cl/mjb0z"))
-                        context.startActivity(intent)
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        navController.navigate("home") {
+                            popUpTo("splash") { inclusive = true }
+                        }
                     }
-                }
             )
         }
-
-        // Botón "Saltar"
-        Text(
-            text = "Saltar",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = Color.Blue,
-                fontSize = 18.sp
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .clickable {
-                    navController.navigate("home") {
-                        popUpTo("splash") { inclusive = true }
-                    }
-                }
-        )
     }
 }
+
 

@@ -55,8 +55,8 @@ kotlin {
                 implementation("com.itextpdf:itext7-core:7.2.2")
                 implementation("com.itextpdf:kernel:7.2.2")
                 implementation ("com.sun.mail:android-activation:1.6.2")
-                implementation ("com.google.android.gms:play-services-ads-identifier:18.1.0")
-                implementation ("com.sun.mail:android-mail:1.6.2")
+                implementation ("com.google.android.gms:play-services-ads:23.5.0")
+
 
             }
         }
@@ -120,6 +120,8 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.benchmark.macro)
+   // implementation(libs.ads.mobile.sdk)
+   // implementation(libs.play.services.ads.lite)
 }
 
 
