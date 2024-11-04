@@ -1,5 +1,6 @@
 package pharmapro.carlosnava
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.nfc.NfcAdapter
@@ -57,7 +58,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -168,6 +174,34 @@ fun HomeScreen(navController: NavController) {
     var nfcDetected by remember { mutableStateOf(false) }
     var nfcMessage by remember { mutableStateOf(buildAnnotatedString { append("Datos de su toma: (esperando lectura)") }) }
 
+    // Variable de estado para mostrar el anuncio
+    var showAd by remember { mutableStateOf(false) }
+    var interstitialAd: InterstitialAd? by remember { mutableStateOf(null) }
+
+    // Cargar el anuncio intersticial una vez al iniciar la pantalla
+    LaunchedEffect(Unit) {
+        // Cargar el anuncio y retrasarlo unos segundos antes de mostrarlo
+        delay(5000) // Ajusta el tiempo en milisegundos (5000ms = 5 segundos)
+
+        InterstitialAd.load(context, "ca-app-pub-3940256099942544/1033173712", AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
+            override fun onAdLoaded(ad: InterstitialAd) {
+                interstitialAd = ad
+                showAd = true
+            }
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                // El anuncio falló al cargar
+            }
+        })
+    }
+
+    // Mostrar el anuncio si está listo
+    LaunchedEffect(showAd) {
+        if (showAd && interstitialAd != null) {
+            interstitialAd?.show(context as Activity)
+            showAd = false // Resetear después de mostrar
+        }
+    }
+
     // Animación del logo
     var logoScale by remember { mutableStateOf(0.5f) }
     // Animación de la imagen NFC
@@ -266,6 +300,7 @@ fun HomeScreen(navController: NavController) {
         }
     }
 
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -337,6 +372,9 @@ fun HomeScreen(navController: NavController) {
                         color = if (nfcDetected) Color.Gray else Color(0xFF4CAF50), // Color gris si es un mensaje de éxito
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
+
+
+
                 }
             }
         }

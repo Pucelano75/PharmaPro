@@ -295,17 +295,14 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
     calendar.set(Calendar.MINUTE, minuto)
     calendar.set(Calendar.SECOND, 0)
 
-    // Verificar si la hora de la alarma es anterior a la hora actual
+    // Si la hora de inicio ya pasó hoy, establece el inicio en el día siguiente
     if (calendar.timeInMillis <= System.currentTimeMillis()) {
-        // Si la hora ya pasó hoy, programar la alarma para el día siguiente
         calendar.add(Calendar.DAY_OF_MONTH, 1)
     }
 
     for (day in 0 until reminder.dias) {
-        // Clonar el calendario para evitar modificaciones accidentales en el bucle
+        // Clona el calendario para cada día específico de alarma
         val currentCalendar = calendar.clone() as Calendar
-
-        // Añadir días adicionales según corresponda
         currentCalendar.add(Calendar.DAY_OF_MONTH, day)
 
         // Programar una alarma para cada intervalo basado en la pauta
@@ -327,11 +324,12 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
                 pendingIntent
             )
 
-            // Incrementar el tiempo para la siguiente alarma basándose en la pauta
+            // Incrementar el tiempo para la siguiente alarma en base a la pauta
             currentCalendar.add(Calendar.MINUTE, (24 * 60) / reminder.pauta)
         }
     }
 }
+
 
 
 
