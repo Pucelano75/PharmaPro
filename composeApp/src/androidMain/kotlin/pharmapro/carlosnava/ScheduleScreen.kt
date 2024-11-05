@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.widget.TimePicker
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -300,6 +301,9 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
         calendar.add(Calendar.DAY_OF_MONTH, 1)
     }
 
+    // Calcular el intervalo de minutos entre cada alarma en función de la pauta
+    val intervaloMinutos = (24 * 60) / reminder.pauta
+
     for (day in 0 until reminder.dias) {
         // Clona el calendario para cada día específico de alarma
         val currentCalendar = calendar.clone() as Calendar
@@ -324,11 +328,15 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
                 pendingIntent
             )
 
-            // Incrementar el tiempo para la siguiente alarma en base a la pauta
-            currentCalendar.add(Calendar.MINUTE, (24 * 60) / reminder.pauta)
+            // Log para verificar el tiempo de cada alarma
+            Log.d("ProgramacionDeAlarmas", "Programando alarma para: ${currentCalendar.time}")
+
+            // Incrementar el tiempo para la siguiente alarma en base al intervalo
+            currentCalendar.add(Calendar.MINUTE, intervaloMinutos)
         }
     }
 }
+
 
 
 

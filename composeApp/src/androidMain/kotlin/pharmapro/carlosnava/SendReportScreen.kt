@@ -20,6 +20,8 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,8 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -36,6 +43,21 @@ import java.io.IOException
 @Composable
 fun SendReportScreen(navController: NavHostController) {
     val context = LocalContext.current
+
+    // Inicializa Mobile Ads
+    LaunchedEffect(Unit) {
+        MobileAds.initialize(context) {}
+    }
+
+    // Crea un AdView para el banner
+    val adView = remember { AdView(context).apply {
+        adUnitId = "ca-app-pub-3940256099942544/6300978111" // Reemplaza con tu ID de anuncio
+        setAdSize(AdSize.BANNER)
+    }}
+
+    // Cargar el anuncio
+    val adRequest = AdRequest.Builder().build()
+    adView.loadAd(adRequest)
 
     Column(
         modifier = Modifier
@@ -83,6 +105,9 @@ fun SendReportScreen(navController: NavHostController) {
         ) {
             Text("Generar Informe", style = MaterialTheme.typography.bodyLarge)
         }
+        // Banner Ad
+        Spacer(modifier = Modifier.height(16.dp)) // Espaciado antes del anuncio
+        AndroidView(factory = { adView }) // Mostrar el banner
     }
 }
 

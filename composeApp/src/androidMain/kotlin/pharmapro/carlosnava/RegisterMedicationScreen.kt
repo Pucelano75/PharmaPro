@@ -1,5 +1,7 @@
 package pharmapro.carlosnava
 
+import com.google.android.gms.ads.AdSize
+
 import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.NdefMessage
@@ -16,7 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.google.android.gms.ads.AdRequest
+
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import java.nio.charset.Charset
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +35,11 @@ fun RegisterMedicationScreen(navController: NavController) {
     var isWritingNfc by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(context)
+
+    // Inicializa Mobile Ads
+    LaunchedEffect(Unit) {
+        MobileAds.initialize(context) {}
+    }
 
     Scaffold(
         topBar = {
@@ -84,6 +96,22 @@ fun RegisterMedicationScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(nfcMessage, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+
+            // Banner Ad
+            Spacer(modifier = Modifier.height(16.dp))
+            val adView = remember { AdView(context).apply {
+                adUnitId = "ca-app-pub-3940256099942544/6300978111" // ID de anuncio de prueba
+                setAdSize(AdSize.BANNER)
+                loadAd(AdRequest.Builder().build())
+            }}
+
+            // Coloca el anuncio de banner
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                factory = { adView }
+            )
 
             // Lógica para escribir en una etiqueta NFC cuando esté disponible
             if (isWritingNfc) {
