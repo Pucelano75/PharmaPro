@@ -42,11 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import pharmapro.carlosnava.MedicationReminderReceiver
 import java.util.Calendar
 
 @Composable
 fun ScheduleScreen(navController: NavController) {
-    // Variables para almacenar los detalles de la medicación
     var medicationName by remember { mutableStateOf("") }
     var pauta by remember { mutableStateOf("") }
     var dias by remember { mutableStateOf("") }
@@ -58,7 +58,6 @@ fun ScheduleScreen(navController: NavController) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Estado para manejar el TimePicker
     val calendar = Calendar.getInstance()
     val timePickerDialog = TimePickerDialog(
         context,
@@ -70,20 +69,13 @@ fun ScheduleScreen(navController: NavController) {
         true
     )
 
-    // Cargar los recordatorios guardados en SharedPreferences
     var medicationReminders by remember {
         mutableStateOf(loadMedicationReminders(context).toMutableList())
     }
 
-    // Función para eliminar recordatorio
     fun removeReminder(reminder: MedicationReminder) {
-        // Primero, cancelar las alarmas programadas
         cancelarAlarmas(context, reminder)
-
-        // Luego, eliminar el recordatorio de la lista
         medicationReminders = medicationReminders.filter { it != reminder }.toMutableList()
-
-        // Guardar cambios en SharedPreferences
         saveMedicationReminders(context, medicationReminders)
     }
 
@@ -159,7 +151,6 @@ fun ScheduleScreen(navController: NavController) {
 
         Button(
             onClick = {
-                // Guardar el recordatorio en la lista
                 val newReminder = MedicationReminder(
                     medicacionNombre = medicationName,
                     pauta = pauta.toIntOrNull() ?: 1,
@@ -168,13 +159,11 @@ fun ScheduleScreen(navController: NavController) {
                     retardoAviso = retardoAviso.toIntOrNull() ?: 0
                 )
 
-                // Programar recordatorio
                 programarRecordatorioCompleto(context, newReminder)
 
                 medicationReminders.add(newReminder)
-                saveMedicationReminders(context, medicationReminders) // Guardar en SharedPreferences
+                saveMedicationReminders(context, medicationReminders)
 
-                // Limpiar los campos
                 medicationName = ""
                 pauta = ""
                 dias = ""
@@ -188,7 +177,6 @@ fun ScheduleScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar el resumen de los recordatorios programados
         Text("Recordatorios activos:", style = MaterialTheme.typography.bodyLarge)
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -212,7 +200,6 @@ fun ScheduleScreen(navController: NavController) {
     }
 }
 
-// Clase para representar los recordatorios de medicación
 data class MedicationReminder(
     val medicacionNombre: String,
     val pauta: Int,
@@ -221,7 +208,6 @@ data class MedicationReminder(
     val retardoAviso: Int
 )
 
-// Funciones para guardar y cargar datos de SharedPreferences usando Gson
 fun saveMedicationReminders(context: Context, reminders: List<MedicationReminder>) {
     val sharedPreferences = context.getSharedPreferences("medication_preferences", Context.MODE_PRIVATE)
     val gson = Gson()
@@ -246,15 +232,12 @@ fun loadMedicationReminders(context: Context): List<MedicationReminder> {
     }
 }
 
-// Función para cancelar todas las alarmas asociadas a un recordatorio
 fun cancelarAlarmas(context: Context, reminder: MedicationReminder) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     for (day in 0 until reminder.dias) {
         for (i in 0 until reminder.pauta) {
             val intent = Intent(context, MedicationReminderReceiver::class.java)
-
-            // Usar el mismo identificador único que al programar las alarmas
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 reminder.hashCode() + day * 100 + i,
@@ -262,7 +245,6 @@ fun cancelarAlarmas(context: Context, reminder: MedicationReminder) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Cancelar la alarma
             alarmManager.cancel(pendingIntent)
         }
     }
@@ -271,18 +253,14 @@ fun cancelarAlarmas(context: Context, reminder: MedicationReminder) {
 fun programarRecordatorioCompleto(context: Context, reminder: MedicationReminder) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    // Verificar si la versión de Android es 12 o superior
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Para Android 12 (API 31) y superiores
         if (alarmManager.canScheduleExactAlarms()) {
             programarAlarmas(context, alarmManager, reminder)
         } else {
-            // Si no se pueden programar alarmas exactas, redirigir al usuario
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
             context.startActivity(intent)
         }
     } else {
-        // Para versiones anteriores a Android 12
         programarAlarmas(context, alarmManager, reminder)
     }
 }
@@ -291,25 +269,18 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
     val calendar = Calendar.getInstance()
     val (hora, minuto) = reminder.horaInicio.split(":").map { it.toInt() }
 
-    // Establecer la hora de inicio de la primera alarma
     calendar.set(Calendar.HOUR_OF_DAY, hora)
     calendar.set(Calendar.MINUTE, minuto)
     calendar.set(Calendar.SECOND, 0)
 
-    // Si la hora de inicio ya pasó hoy, establece el inicio en el día siguiente
     if (calendar.timeInMillis <= System.currentTimeMillis()) {
         calendar.add(Calendar.DAY_OF_MONTH, 1)
     }
 
-    // Calcular el intervalo de minutos entre cada alarma en función de la pauta
-    val intervaloMinutos = (24 * 60) / reminder.pauta
-
     for (day in 0 until reminder.dias) {
-        // Clona el calendario para cada día específico de alarma
         val currentCalendar = calendar.clone() as Calendar
         currentCalendar.add(Calendar.DAY_OF_MONTH, day)
 
-        // Programar una alarma para cada intervalo basado en la pauta
         for (i in 0 until reminder.pauta) {
             val intent = Intent(context, MedicationReminderReceiver::class.java)
             intent.putExtra("medicationName", reminder.medicacionNombre)
@@ -321,18 +292,15 @@ fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: Med
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Programar la alarma
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 currentCalendar.timeInMillis,
                 pendingIntent
             )
 
-            // Log para verificar el tiempo de cada alarma
-            Log.d("ProgramacionDeAlarmas", "Programando alarma para: ${currentCalendar.time}")
+            Log.d("AlarmasProgramadas", "Alarma programada para: ${currentCalendar.time}")
 
-            // Incrementar el tiempo para la siguiente alarma en base al intervalo
-            currentCalendar.add(Calendar.MINUTE, intervaloMinutos)
+            currentCalendar.add(Calendar.MINUTE, (24 * 60) / reminder.pauta)
         }
     }
 }
