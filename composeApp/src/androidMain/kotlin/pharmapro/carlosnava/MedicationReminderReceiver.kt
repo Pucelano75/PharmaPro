@@ -8,10 +8,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.work.*
 
 class MedicationReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val medicationName = intent.getStringExtra("medicationName") ?: "Medicación"
+
+        // Reiniciar el estado de la notificación en SharedPreferences
+        val prefs = context.getSharedPreferences("MedReminderPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("isNotificationPressed", false).apply()
 
         // Crear la notificación
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -28,8 +33,10 @@ class MedicationReminderReceiver : BroadcastReceiver() {
             }
         }
 
-        // Crear el intent que se lanzará al hacer clic en la notificación
-        val notificationIntent = Intent(context, MainActivity::class.java) // Cambia MainActivity por tu actividad principal
+        // Crear el intent para abrir la app al presionar la notificación
+        val notificationIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra("medication_reminder", true)
+        }
         val pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         // Construir la notificación
@@ -42,9 +49,30 @@ class MedicationReminderReceiver : BroadcastReceiver() {
             .build()
 
         // Mostrar la notificación
-        notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
+        notificationManager.notify(1001, notification)
+
+        // Iniciar el WorkManager para los recordatorios periódicos cada 15 minutos
+        scheduleRecurringReminder(context, medicationName)
+    }
+
+    // Función para configurar el Worker con un recordatorio recurrente cada 15 minutos
+    private fun scheduleRecurringReminder(context: Context, medicationName: String) {
+        val data = Data.Builder()
+            .putString("medicationName", medicationName)
+            .build()
+
+        val workRequest = PeriodicWorkRequestBuilder<MedicationReminderWorker>(15, java.util.concurrent.TimeUnit.MINUTES)
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "MedicationReminderWork",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            workRequest
+        )
     }
 }
+
 
 
 

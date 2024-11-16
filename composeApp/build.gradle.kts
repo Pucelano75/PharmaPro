@@ -56,6 +56,8 @@ kotlin {
                 implementation("com.itextpdf:kernel:7.2.2")
                 implementation ("com.sun.mail:android-activation:1.6.2")
                 implementation ("com.google.android.gms:play-services-ads:23.5.0")
+                implementation(libs.androidx.work.runtime.ktx.v271)
+
 
 
             }

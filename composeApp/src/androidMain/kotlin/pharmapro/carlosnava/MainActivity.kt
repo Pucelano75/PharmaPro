@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.WorkManager
 import pharmapro.carlosnava.ui.theme.PharmaProTheme
 
 
@@ -61,6 +62,26 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // Verificar si se accedió desde el recordatorio de medicación
+        if (intent.getBooleanExtra("medication_reminder", false)) {
+            // Actualizar el estado en SharedPreferences
+            val prefs = getSharedPreferences("MedReminderPrefs", Context.MODE_PRIVATE)
+            prefs.edit().putBoolean("isNotificationPressed", true).apply()
+
+            // Cancelar el Worker para detener los recordatorios repetitivos
+            WorkManager.getInstance(this).cancelUniqueWork("MedicationReminderWork")
+
+
+        // Cancelar todas las notificaciones activas
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
+
+        // Cancelar alarmas activas si existen
+        cancelActiveAlarms()
+    }
+
+
         // Manejo del botón "volver"
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -100,6 +121,20 @@ class MainActivity : ComponentActivity() {
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(nfcChannel)
             notificationManager.createNotificationChannel(medicationChannel)
+        }
+    }
+
+    // Cancelar alarmas activas
+    private fun cancelActiveAlarms() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager
+        val pendingIntent = android.app.PendingIntent.getBroadcast(
+            this,
+            0,
+            android.content.Intent(this, MedicationReminderReceiver::class.java),
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+        if (alarmManager != null && pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
         }
     }
 
