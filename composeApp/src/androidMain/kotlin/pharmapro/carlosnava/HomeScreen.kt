@@ -183,7 +183,7 @@ fun HomeScreen(navController: NavController) {
         // Cargar el anuncio y retrasarlo unos segundos antes de mostrarlo
         delay(5000) // Ajusta el tiempo en milisegundos (5000ms = 5 segundos)
 
-        InterstitialAd.load(context, "ca-app-pub-3940256099942544/1033173712", AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
+        InterstitialAd.load(context, "ca-app-pub-5792195439781648/7077446255", AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) {
                 interstitialAd = ad
                 showAd = true

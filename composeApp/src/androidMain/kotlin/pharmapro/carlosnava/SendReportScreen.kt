@@ -51,7 +51,7 @@ fun SendReportScreen(navController: NavHostController) {
 
     // Crea un AdView para el banner
     val adView = remember { AdView(context).apply {
-        adUnitId = "ca-app-pub-3940256099942544/6300978111" // Reemplaza con tu ID de anuncio
+        adUnitId = "ca-app-pub-5792195439781648/1519476163" // Reemplaza con tu ID de anuncio
         setAdSize(AdSize.BANNER)
     }}
 

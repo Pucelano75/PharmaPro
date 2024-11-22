@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.TimePicker
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -265,6 +266,7 @@ fun programarRecordatorioCompleto(context: Context, reminder: MedicationReminder
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.M)
 fun programarAlarmas(context: Context, alarmManager: AlarmManager, reminder: MedicationReminder) {
     val calendar = Calendar.getInstance()
     val (hora, minuto) = reminder.horaInicio.split(":").map { it.toInt() }

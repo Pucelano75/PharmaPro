@@ -100,7 +100,7 @@ fun RegisterMedicationScreen(navController: NavController) {
             // Banner Ad
             Spacer(modifier = Modifier.height(16.dp))
             val adView = remember { AdView(context).apply {
-                adUnitId = "ca-app-pub-3940256099942544/6300978111" // ID de anuncio de prueba
+                adUnitId = "ca-app-pub-5792195439781648/1707178428" // ID de anuncio de prueba
                 setAdSize(AdSize.BANNER)
                 loadAd(AdRequest.Builder().build())
             }}

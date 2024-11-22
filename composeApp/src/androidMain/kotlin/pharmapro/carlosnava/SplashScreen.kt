@@ -1,7 +1,5 @@
 package pharmapro.carlosnava
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOutBounce
 import androidx.compose.animation.core.tween
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,17 +29,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
-import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.delay
 
 @Composable
@@ -57,7 +52,7 @@ fun SplashScreen(navController: NavController) {
 
     // Crea un AdView para el banner
     val adView = remember { AdView(context).apply {
-        adUnitId = "ca-app-pub-3940256099942544/6300978111" // Reemplaza con tu ID de anuncio
+        adUnitId = "ca-app-pub-5792195439781648/9789140004" // Reemplaza con tu ID de anuncio
         setAdSize(AdSize.BANNER)
     }}
 
