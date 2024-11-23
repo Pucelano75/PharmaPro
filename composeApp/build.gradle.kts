@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
 }
 
 kotlin {
@@ -57,6 +58,8 @@ kotlin {
                 implementation ("com.sun.mail:android-activation:1.6.2")
                 implementation ("com.google.android.gms:play-services-ads:23.5.0")
                 implementation(libs.androidx.work.runtime.ktx.v271)
+                implementation(project.dependencies.platform(libs.firebase.bom))
+                implementation(libs.firebase.analytics)
 
 
 
@@ -89,7 +92,7 @@ android {
         applicationId = "pharmapro.carlosnava"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 4
+        versionCode = 5
         versionName = "1.0"
     }
 

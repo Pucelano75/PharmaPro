@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permiso para usar NFC -->
     <uses-permission android:name="android.permission.NFC" />
@@ -16,8 +16,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     -->
 
-
-
     <application
         android:name=".PharmaProApp"
         android:allowBackup="true"
@@ -27,15 +25,26 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
+        <!-- Firebase initialization -->
+        <meta-data
+            android:name="com.google.firebase.analytics.FirebaseAnalytics"
+            android:value="true" />
+
         <!-- AdMob initialization -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/> <!-- Reemplaza con tu ID de aplicación -->
+            android:value="ca-app-pub-3940256099942544~3347511713" /> <!-- Reemplaza con tu ID de aplicación -->
 
         <!-- Banner ad unit ID for testing -->
         <meta-data
             android:name="com.google.android.gms.ads.BANNER_AD_UNIT_ID"
-            android:value="ca-app-pub-3940256099942544/6300978111"/> <!-- ID de banner de prueba -->
+            android:value="ca-app-pub-3940256099942544/6300978111" /> <!-- ID de banner de prueba -->
+
+        <!-- Configuración para resolver conflicto de AD_SERVICES_CONFIG -->
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"
+            tools:replace="android:resource" />
 
         <!-- MainActivity -->
         <activity
@@ -56,7 +65,8 @@
         </receiver>
 
         <!-- Receiver para recibir eventos tras el reinicio -->
-        <receiver android:name=".BootReceiver"
+        <receiver
+            android:name=".BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -70,20 +80,19 @@
             android:exported="true"
             android:enabled="true" />
 
+        <!-- FileProvider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
-
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-
     </application>
 </manifest>
+
 
 
 

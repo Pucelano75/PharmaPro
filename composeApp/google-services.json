@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "432107470429",
+    "project_id": "pharmapro-a646d",
+    "storage_bucket": "pharmapro-a646d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432107470429:android:8ce17b93524344b74617b4",
+        "android_client_info": {
+          "package_name": "pharmapro.carlosnava"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXOU8tUrRfh2s0BsOknQ1sJaee2SboVLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
